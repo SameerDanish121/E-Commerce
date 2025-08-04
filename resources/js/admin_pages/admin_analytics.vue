@@ -1,76 +1,88 @@
 <template>
   <div class="analytics-dashboard">
-    <!-- Header -->
-    <div class="dashboard-header">
-      <h1>E-commerce Analytics</h1>
-      <div class="header-controls">
-        <select v-model="selectedPeriod" class="control-select">
+    <!-- Dashboard Controls -->
+    <div class="dashboard-controls">
+      <div class="control-group">
+        <label>Time Period:</label>
+        <select v-model="selectedPeriod" @change="updateCharts">
           <option value="day">Daily</option>
           <option value="week">Weekly</option>
           <option value="month">Monthly</option>
           <option value="year">Yearly</option>
         </select>
-        <select v-model="selectedYear" class="control-select">
+      </div>
+      
+      <div class="control-group">
+        <label>Year:</label>
+        <select v-model="selectedYear" @change="updateCharts">
           <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
         </select>
-        <select v-model="selectedChartType" class="control-select">
+      </div>
+      
+      <div class="control-group">
+        <label>Chart Type:</label>
+        <select v-model="selectedChartType" @change="updateCharts">
           <option value="line">Line Chart</option>
           <option value="bar">Bar Chart</option>
           <option value="pie">Pie Chart</option>
-          <option value="doughnut">Doughnut Chart</option>
-          <option value="radar">Radar Chart</option>
+          <option value="doughnut">Doughnut</option>
+          <option value="radar">Radar</option>
         </select>
       </div>
     </div>
+
+    <!-- Summary Cards -->
     <div class="summary-cards">
-      <div class="summary-card" style="border-left: 4px solid #4f46e5; background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)">
+      <div class="summary-card" :style="cardStyle(0)">
         <div class="card-icon">💰</div>
         <div class="card-content">
           <h3>Total Revenue</h3>
           <p>{{ formatCurrency(totalRevenue) }}</p>
-          <p :style="revenueChange >= 0 ? 'color: #10b981' : 'color: #ef4444'">
+          <p :style="revenueChange >= 0 ? positiveStyle : negativeStyle">
             {{ revenueChange >= 0 ? '↑' : '↓' }} {{ Math.abs(revenueChange) }}% 
-            <span style="color: #6b7280">{{ revenueChange >= 0 ? 'increase' : 'decrease' }}</span>
+            <span class="change-text">{{ revenueChange >= 0 ? 'increase' : 'decrease' }}</span>
           </p>
         </div>
       </div>
 
-      <div class="summary-card" style="border-left: 4px solid #10b981; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)">
+      <div class="summary-card" :style="cardStyle(1)">
         <div class="card-icon">📦</div>
         <div class="card-content">
           <h3>Total Orders</h3>
           <p>{{ totalOrders }}</p>
-          <p :style="orderChange >= 0 ? 'color: #10b981' : 'color: #ef4444'">
+          <p :style="orderChange >= 0 ? positiveStyle : negativeStyle">
             {{ orderChange >= 0 ? '↑' : '↓' }} {{ Math.abs(orderChange) }}% 
-            <span style="color: #6b7280">{{ orderChange >= 0 ? 'increase' : 'decrease' }}</span>
+            <span class="change-text">{{ orderChange >= 0 ? 'increase' : 'decrease' }}</span>
           </p>
         </div>
       </div>
 
-      <div class="summary-card" style="border-left: 4px solid #6366f1; background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%)">
+      <div class="summary-card" :style="cardStyle(2)">
         <div class="card-icon">👥</div>
         <div class="card-content">
           <h3>Active Customers</h3>
           <p>{{ activeCustomers }}</p>
-          <p :style="customerChange >= 0 ? 'color: #10b981' : 'color: #ef4444'">
+          <p :style="customerChange >= 0 ? positiveStyle : negativeStyle">
             {{ customerChange >= 0 ? '↑' : '↓' }} {{ Math.abs(customerChange) }}% 
-            <span style="color: #6b7280">{{ customerChange >= 0 ? 'growth' : 'decline' }}</span>
+            <span class="change-text">{{ customerChange >= 0 ? 'growth' : 'decline' }}</span>
           </p>
         </div>
       </div>
 
-      <div class="summary-card" style="border-left: 4px solid #ec4899; background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%)">
+      <div class="summary-card" :style="cardStyle(3)">
         <div class="card-icon">📊</div>
         <div class="card-content">
           <h3>Avg. Order Value</h3>
           <p>{{ formatCurrency(avgOrderValue) }}</p>
-          <p :style="aovChange >= 0 ? 'color: #10b981' : 'color: #ef4444'">
+          <p :style="aovChange >= 0 ? positiveStyle : negativeStyle">
             {{ aovChange >= 0 ? '↑' : '↓' }} {{ Math.abs(aovChange) }}% 
-            <span style="color: #6b7280">{{ aovChange >= 0 ? 'increase' : 'decrease' }}</span>
+            <span class="change-text">{{ aovChange >= 0 ? 'increase' : 'decrease' }}</span>
           </p>
         </div>
       </div>
     </div>
+
+    <!-- Main Charts Row -->
     <div class="chart-row">
       <div class="chart-container">
         <h2>Sales Revenue Trend</h2>
@@ -86,6 +98,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Secondary Charts Row -->
     <div class="chart-row">
       <div class="chart-container">
         <h2>Top Customers by Spending</h2>
@@ -100,264 +114,400 @@
           <canvas ref="productsChart"></canvas>
         </div>
       </div>
+    </div>
 
+    <!-- Delivery Performance -->
+    <div class="chart-row">
       <div class="chart-container">
         <h2>Delivery Performance</h2>
         <div class="chart-wrapper">
           <canvas ref="deliveryChart"></canvas>
         </div>
         <div class="performance-metrics">
-          <div style="background-color: #d1fae5">
-            <div style="color: #065f46">{{ deliveryPerformance.onTime }}</div>
-            <div style="color: #047857; font-size: 0.75rem">On Time</div>
-          </div>
-          <div style="background-color: #fee2e2">
-            <div style="color: #b91c1c">{{ deliveryPerformance.late }}</div>
-            <div style="color: #dc2626; font-size: 0.75rem">Late</div>
-          </div>
-          <div style="background-color: #e5e7eb">
-            <div style="color: #1f2937">{{ deliveryPerformance.noDate }}</div>
-            <div style="color: #4b5563; font-size: 0.75rem">No Date</div>
+          <div v-for="(metric, index) in deliveryMetrics" :key="index" :style="metricStyle(index)">
+            <div>{{ metric.value }}</div>
+            <div>{{ metric.label }}</div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="table-container">
-      <h2>Recent Orders</h2>
-      <div class="table-filters">
-        <select v-model="tableFilters.status" class="filter-select">
-          <option value="all">All Statuses</option>
-          <option value="Pending">Pending</option>
-          <option value="Dispatched">Dispatched</option>
-          <option value="Completed">Completed</option>
-          <option value="Canceled">Canceled</option>
-        </select>
-        <input v-model="tableFilters.customer" placeholder="Filter by customer" class="filter-input">
-        <input v-model="tableFilters.date" type="date" class="filter-input">
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Amount</th>
-              <th>Products</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="order in filteredOrders" :key="order.order_id">
-              <td>#{{ order.order_id }}</td>
-              <td>
-                <div class="customer-cell">
-                  <img :src="order.customer.profile_pic" alt="">
-                  <div>
-                    <div>{{ order.customer.name }}</div>
-                    <div>{{ order.customer.phone_no }}</div>
-                  </div>
-                </div>
-              </td>
-              <td>{{ formatDate(order.order_datetime) }}</td>
-              <td>
-                <span :class="getStatusClass(order.status)">{{ order.status }}</span>
-              </td>
-              <td>{{ formatCurrency(order.total_payment) }}</td>
-              <td>
-                <div class="product-tags">
-                  <span v-for="(product, index) in order.products" :key="index">
-                    {{ product.product_name }} (×{{ product.quantity }})
-                  </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, computed, onMounted, watch } from 'vue';
+import { useOrderProcessingStore } from '@/stores/OrderProcessingStore';
+import { useAdminProductStore } from '@/stores/adminProducts';
+import { useAllCustomerStore } from '@/stores/AllCustomerStore';
 import { Chart, registerables } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+// Register Chart.js components
 Chart.register(...registerables, zoomPlugin, ChartDataLabels);
+
 export default {
   name: 'AnalyticsDashboard',
-  data() {
-    return {
-      selectedPeriod: 'month',
-      selectedYear: new Date().getFullYear(),
-      selectedChartType: 'line',
-      availableYears: [2023, 2022, 2021],
-      tableFilters: {
-        status: 'all',
-        customer: '',
-        date: ''
-      },
-      ordersData: [
-        {
-          order_id: 1,
-          order_datetime: '2023-05-15T10:30:00',
-          status: 'Completed',
-          total_payment: 125.99,
-          delivered_on_time: true,
-          customer: {
-            customer_id: 1,
-            name: 'John Doe',
-            phone_no: '1234567890',
-            profile_pic: 'https://randomuser.me/api/portraits/men/1.jpg'
-          },
-          products: [
-            { product_id: 1, product_name: 'T-Shirt', quantity: 2, price_at_purchase: 25.99 },
-            { product_id: 2, product_name: 'Jeans', quantity: 1, price_at_purchase: 74.00 }
-          ]
-        },
-      ],
-      salesTrendData: {
-        day: [
-          { date: '2023-05-01', revenue: 1200, orders: 15 },
-          { date: '2023-05-02', revenue: 1800, orders: 20 },
-          // More daily data
-        ],
-        month: [
-          { month: '2023-01', revenue: 15000, orders: 120 },
-          { month: '2023-02', revenue: 18000, orders: 150 },
-          // More monthly data
-        ]
-      },
-      topCustomers: [
-        { id: 1, name: 'John Doe', total: 2500, orders: 12 },
-        { id: 2, name: 'Jane Smith', total: 1800, orders: 8 },
-        // More customers
-      ],
-      topProducts: [
-        { id: 1, name: 'Premium T-Shirt', revenue: 5200, quantity: 120 },
-        { id: 2, name: 'Designer Jeans', revenue: 4800, quantity: 80 },
-        // More products
-      ],
-      deliveryPerformance: {
-        onTime: 85,
-        late: 10,
-        noDate: 5
-      },
-      charts: {
-        sales: null,
-        orders: null,
-        customers: null,
-        products: null,
-        delivery: null
-      }
-    };
-  },
-  computed: {
-    totalRevenue() {
-      return this.ordersData.reduce((sum, order) => sum + order.total_payment, 0);
-    },
-    totalOrders() {
-      return this.ordersData.length;
-    },
-    activeCustomers() {
+  setup() {
+    const orderStore = useOrderProcessingStore();
+    const productStore = useAdminProductStore();
+    const customerStore = useAllCustomerStore();
+
+    // Refs
+    const selectedPeriod = ref('month');
+    const selectedYear = ref(new Date().getFullYear());
+    const selectedChartType = ref('line');
+    const salesChart = ref(null);
+    const ordersChart = ref(null);
+    const customersChart = ref(null);
+    const productsChart = ref(null);
+    const deliveryChart = ref(null);
+
+    // Color schemes
+    const colorSchemes = [
+      ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'], // Indigo
+      ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'], // Emerald
+      ['#ec4899', '#f472b6', '#f9a8d4', '#fbcfe8', '#fce7f3'], // Pink
+      ['#f59e0b', '#fbbf24', '#fcd34d', '#fde68a', '#fef3c7']  // Amber
+    ];
+
+    // Initialize stores
+    onMounted(async () => {
+      await Promise.all([
+        orderStore.fetchAllOrders(),
+        productStore.fetchProducts(),
+        customerStore.fetchAllCustomers()
+      ]);
+      initCharts();
+    });
+
+    // Computed properties
+    const availableYears = computed(() => {
+      const years = new Set();
+      orderStore.orders.forEach(order => {
+        const year = new Date(order.order_datetime).getFullYear();
+        years.add(year);
+      });
+      return Array.from(years).sort((a, b) => b - a);
+    });
+
+    const totalRevenue = computed(() => {
+      return orderStore.orders.reduce((sum, order) => sum + order.total_payment, 0);
+    });
+
+    const totalOrders = computed(() => orderStore.orders.length);
+
+    const activeCustomers = computed(() => {
       const customerIds = new Set();
-      this.ordersData.forEach(order => {
+      orderStore.orders.forEach(order => {
         if (order.customer?.customer_id) {
           customerIds.add(order.customer.customer_id);
         }
       });
       return customerIds.size;
-    },
-    avgOrderValue() {
-      return this.totalOrders > 0 ? this.totalRevenue / this.totalOrders : 0;
-    },
-    revenueChange() {
-      return 12.5; // Sample change percentage
-    },
-    orderChange() {
-      return 8.3; // Sample change percentage
-    },
-    customerChange() {
-      return 5.7; // Sample change percentage
-    },
-    aovChange() {
-      return 3.2; // Sample change percentage
-    },
-    filteredOrders() {
-      return this.ordersData.filter(order => {
-        const matchesStatus = this.tableFilters.status === 'all' || order.status === this.tableFilters.status;
-        const matchesCustomer = !this.tableFilters.customer || 
-          order.customer.name.toLowerCase().includes(this.tableFilters.customer.toLowerCase());
-        const matchesDate = !this.tableFilters.date || 
-          order.order_datetime.startsWith(this.tableFilters.date);
-        
-        return matchesStatus && matchesCustomer && matchesDate;
-      });
-    },
-    currentSalesData() {
-      return this.salesTrendData[this.selectedPeriod] || this.salesTrendData.month;
-    }
-  },
-  watch: {
-    selectedPeriod() {
-      this.updateCharts();
-    },
-    selectedChartType() {
-      this.updateCharts();
-    }
-  },
-  mounted() {
-    this.initCharts();
-    // In a real app, you would fetch data here:
-    // this.fetchData();
-  },
-  beforeUnmount() {
-    // Destroy charts when component is unmounted
-    Object.values(this.charts).forEach(chart => {
-      if (chart) chart.destroy();
     });
-  },
-  methods: {
-    initCharts() {
-      this.charts.sales = this.createChart(this.$refs.salesChart, this.getSalesChartConfig());
-      this.charts.orders = this.createChart(this.$refs.ordersChart, this.getOrdersChartConfig());
-      this.charts.customers = this.createChart(this.$refs.customersChart, this.getCustomersChartConfig());
-      this.charts.products = this.createChart(this.$refs.productsChart, this.getProductsChartConfig());
-      this.charts.delivery = this.createChart(this.$refs.deliveryChart, this.getDeliveryChartConfig());
-    },
-    updateCharts() {
-      if (this.charts.sales) {
-        this.charts.sales.destroy();
-        this.charts.sales = this.createChart(this.$refs.salesChart, this.getSalesChartConfig());
+
+    const avgOrderValue = computed(() => {
+      return totalOrders.value > 0 ? totalRevenue.value / totalOrders.value : 0;
+    });
+
+    const topCustomers = computed(() => {
+      const customerMap = new Map();
+      
+      orderStore.orders.forEach(order => {
+        if (order.customer?.customer_id) {
+          const customerId = order.customer.customer_id;
+          const current = customerMap.get(customerId) || {
+            id: customerId,
+            name: order.customer.name,
+            total: 0,
+            orders: 0
+          };
+          current.total += order.total_payment;
+          current.orders += 1;
+          customerMap.set(customerId, current);
+        }
+      });
+      
+      return Array.from(customerMap.values())
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+    });
+
+    const topProducts = computed(() => {
+      const productMap = new Map();
+      
+      orderStore.orders.forEach(order => {
+        if (order.products) {
+          order.products.forEach(product => {
+            const productId = product.product_id;
+            const current = productMap.get(productId) || {
+              id: productId,
+              name: product.product_name,
+              revenue: 0,
+              quantity: 0
+            };
+            current.revenue += product.price_at_purchase * product.quantity;
+            current.quantity += product.quantity;
+            productMap.set(productId, current);
+          });
+        }
+      });
+      
+      return Array.from(productMap.values())
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 5);
+    });
+
+    const deliveryPerformance = computed(() => {
+      const performance = {
+        onTime: 0,
+        late: 0,
+        noDate: 0
+      };
+      
+      orderStore.orders.forEach(order => {
+        if (order.status === 'Completed') {
+          if (order.delivered_on_time === true) {
+            performance.onTime++;
+          } else if (order.delivered_on_time === false) {
+            performance.late++;
+          } else {
+            performance.noDate++;
+          }
+        }
+      });
+      
+      return performance;
+    });
+
+    const deliveryMetrics = computed(() => [
+      { label: 'On Time', value: deliveryPerformance.value.onTime },
+      { label: 'Late', value: deliveryPerformance.value.late },
+      { label: 'No Date', value: deliveryPerformance.value.noDate }
+    ]);
+
+    const groupedSalesData = computed(() => {
+      if (!orderStore.orders.length) return [];
+      
+      const filtered = orderStore.orders.filter(order => {
+        const orderYear = new Date(order.order_datetime).getFullYear();
+        return orderYear === selectedYear.value;
+      });
+
+      if (selectedPeriod.value === 'day') {
+        return groupByDay(filtered);
+      } else if (selectedPeriod.value === 'week') {
+        return groupByWeek(filtered);
+      } else if (selectedPeriod.value === 'month') {
+        return groupByMonth(filtered);
+      } else {
+        return groupByYear(filtered);
       }
-      if (this.charts.orders) {
-        this.charts.orders.destroy();
-        this.charts.orders = this.createChart(this.$refs.ordersChart, this.getOrdersChartConfig());
+    });
+
+    // Change calculations
+    const revenueChange = computed(() => calculatePercentageChange('revenue'));
+    const orderChange = computed(() => calculatePercentageChange('orders'));
+    const customerChange = computed(() => calculatePercentageChange('customers'));
+    const aovChange = computed(() => calculatePercentageChange('aov'));
+
+    // Methods
+    const initCharts = () => {
+      if (salesChart.value) {
+        charts.sales = createChart(salesChart.value, getSalesChartConfig());
       }
-    },
-    createChart(canvas, config) {
+      if (ordersChart.value) {
+        charts.orders = createChart(ordersChart.value, getOrdersChartConfig());
+      }
+      if (customersChart.value) {
+        charts.customers = createChart(customersChart.value, getCustomersChartConfig());
+      }
+      if (productsChart.value) {
+        charts.products = createChart(productsChart.value, getProductsChartConfig());
+      }
+      if (deliveryChart.value) {
+        charts.delivery = createChart(deliveryChart.value, getDeliveryChartConfig());
+      }
+    };
+
+    const updateCharts = () => {
+      if (charts.sales) {
+        charts.sales.destroy();
+        charts.sales = createChart(salesChart.value, getSalesChartConfig());
+      }
+      if (charts.orders) {
+        charts.orders.destroy();
+        charts.orders = createChart(ordersChart.value, getOrdersChartConfig());
+      }
+    };
+
+    const charts = {
+      sales: null,
+      orders: null,
+      customers: null,
+      products: null,
+      delivery: null
+    };
+
+    const createChart = (canvas, config) => {
       return new Chart(canvas, config);
-    },
-    getSalesChartConfig() {
-      const isPieLike = ['pie', 'doughnut', 'radar'].includes(this.selectedChartType);
-      const labels = this.currentSalesData.map(item => {
-        if (this.selectedPeriod === 'day') return item.date;
-        if (this.selectedPeriod === 'month') return item.month;
+    };
+
+    const formatCurrency = (value) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(value);
+    };
+
+    const groupByDay = (orders) => {
+      const daysMap = new Map();
+      
+      orders.forEach(order => {
+        const date = new Date(order.order_datetime);
+        const dayKey = date.toISOString().split('T')[0];
+        
+        const existing = daysMap.get(dayKey) || {
+          date: dayKey,
+          revenue: 0,
+          orders: 0
+        };
+        
+        existing.revenue += order.total_payment;
+        existing.orders += 1;
+        daysMap.set(dayKey, existing);
+      });
+      
+      return Array.from(daysMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+    };
+
+    const groupByWeek = (orders) => {
+      const weeksMap = new Map();
+      
+      orders.forEach(order => {
+        const date = new Date(order.order_datetime);
+        const year = date.getFullYear();
+        const weekNumber = getWeekNumber(date);
+        const weekKey = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+        
+        const existing = weeksMap.get(weekKey) || {
+          week: weekKey,
+          revenue: 0,
+          orders: 0
+        };
+        
+        existing.revenue += order.total_payment;
+        existing.orders += 1;
+        weeksMap.set(weekKey, existing);
+      });
+      
+      return Array.from(weeksMap.values()).sort((a, b) => a.week.localeCompare(b.week));
+    };
+
+    const groupByMonth = (orders) => {
+      const monthsMap = new Map();
+      
+      orders.forEach(order => {
+        const date = new Date(order.order_datetime);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        const existing = monthsMap.get(monthKey) || {
+          month: monthKey,
+          revenue: 0,
+          orders: 0
+        };
+        
+        existing.revenue += order.total_payment;
+        existing.orders += 1;
+        monthsMap.set(monthKey, existing);
+      });
+      
+      return Array.from(monthsMap.values()).sort((a, b) => a.month.localeCompare(b.month));
+    };
+
+    const groupByYear = (orders) => {
+      const yearsMap = new Map();
+      
+      orders.forEach(order => {
+        const date = new Date(order.order_datetime);
+        const yearKey = date.getFullYear().toString();
+        
+        const existing = yearsMap.get(yearKey) || {
+          year: yearKey,
+          revenue: 0,
+          orders: 0
+        };
+        
+        existing.revenue += order.total_payment;
+        existing.orders += 1;
+        yearsMap.set(yearKey, existing);
+      });
+      
+      return Array.from(yearsMap.values()).sort((a, b) => a.year.localeCompare(b.year));
+    };
+
+    const getWeekNumber = (date) => {
+      const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+      const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+      return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+    };
+
+    const calculatePercentageChange = (metric) => {
+      if (groupedSalesData.value.length < 2) return 0;
+      
+      const currentPeriod = groupedSalesData.value[groupedSalesData.value.length - 1];
+      const previousPeriod = groupedSalesData.value[groupedSalesData.value.length - 2];
+      
+      let currentValue, previousValue;
+      
+      switch (metric) {
+        case 'revenue':
+          currentValue = currentPeriod.revenue;
+          previousValue = previousPeriod.revenue;
+          break;
+        case 'orders':
+          currentValue = currentPeriod.orders;
+          previousValue = previousPeriod.orders;
+          break;
+        case 'customers':
+          // Simplified - in a real app you'd track customer counts per period
+          return 0;
+        case 'aov':
+          currentValue = currentPeriod.orders > 0 ? currentPeriod.revenue / currentPeriod.orders : 0;
+          previousValue = previousPeriod.orders > 0 ? previousPeriod.revenue / previousPeriod.orders : 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (previousValue === 0) return 0;
+      return ((currentValue - previousValue) / previousValue) * 100;
+    };
+
+    const getSalesChartConfig = () => {
+      const isPieLike = ['pie', 'doughnut', 'radar'].includes(selectedChartType.value);
+      const labels = groupedSalesData.value.map(item => {
+        if (selectedPeriod.value === 'day') return item.date;
+        if (selectedPeriod.value === 'week') return item.week;
+        if (selectedPeriod.value === 'month') return item.month;
         return item.year;
       });
       
       return {
-        type: isPieLike ? 'bar' : this.selectedChartType,
+        type: isPieLike ? 'line' : selectedChartType.value,
         data: {
           labels,
           datasets: [{
             label: 'Revenue',
-            data: this.currentSalesData.map(item => item.revenue),
-            backgroundColor: '#4f46e5',
-            borderColor: '#4f46e5',
+            data: groupedSalesData.value.map(item => item.revenue),
+            backgroundColor: colorSchemes[0][0],
+            borderColor: colorSchemes[0][0],
             borderWidth: 2,
-            fill: this.selectedChartType === 'area',
-            tension: 0.4
+            fill: selectedChartType.value === 'area',
+            tension: 0.4,
+            pointRadius: 5,
+            pointHoverRadius: 7
           }]
         },
         options: {
@@ -368,7 +518,7 @@ export default {
             legend: { position: 'top' },
             tooltip: {
               callbacks: {
-                label: (context) => `Revenue: ${this.formatCurrency(context.raw)}`
+                label: (context) => `Revenue: ${formatCurrency(context.raw)}`
               }
             },
             zoom: {
@@ -376,37 +526,41 @@ export default {
               pan: { enabled: true, mode: 'xy' }
             }
           },
-          scales: this.selectedChartType !== 'pie' && this.selectedChartType !== 'doughnut' ? {
+          scales: !isPieLike ? {
             y: {
               beginAtZero: false,
               ticks: {
-                callback: (value) => this.formatCurrency(value)
+                callback: (value) => formatCurrency(value)
               }
             }
           } : {}
         }
       };
-    },
-    getOrdersChartConfig() {
-      const isPieLike = ['pie', 'doughnut', 'radar'].includes(this.selectedChartType);
-      const labels = this.currentSalesData.map(item => {
-        if (this.selectedPeriod === 'day') return item.date;
-        if (this.selectedPeriod === 'month') return item.month;
+    };
+
+    const getOrdersChartConfig = () => {
+      const isPieLike = ['pie', 'doughnut', 'radar'].includes(selectedChartType.value);
+      const labels = groupedSalesData.value.map(item => {
+        if (selectedPeriod.value === 'day') return item.date;
+        if (selectedPeriod.value === 'week') return item.week;
+        if (selectedPeriod.value === 'month') return item.month;
         return item.year;
       });
       
       return {
-        type: isPieLike ? 'bar' : this.selectedChartType,
+        type: isPieLike ? 'line' : selectedChartType.value,
         data: {
           labels,
           datasets: [{
             label: 'Orders',
-            data: this.currentSalesData.map(item => item.orders),
-            backgroundColor: '#10b981',
-            borderColor: '#10b981',
+            data: groupedSalesData.value.map(item => item.orders),
+            backgroundColor: colorSchemes[1][0],
+            borderColor: colorSchemes[1][0],
             borderWidth: 2,
-            fill: this.selectedChartType === 'area',
-            tension: 0.4
+            fill: selectedChartType.value === 'area',
+            tension: 0.4,
+            pointRadius: 5,
+            pointHoverRadius: 7
           }]
         },
         options: {
@@ -425,22 +579,23 @@ export default {
               pan: { enabled: true, mode: 'xy' }
             }
           },
-          scales: this.selectedChartType !== 'pie' && this.selectedChartType !== 'doughnut' ? {
+          scales: !isPieLike ? {
             y: { beginAtZero: true, ticks: { precision: 0 } }
           } : {}
         }
       };
-    },
-    getCustomersChartConfig() {
+    };
+
+    const getCustomersChartConfig = () => {
       return {
         type: 'bar',
         data: {
-          labels: this.topCustomers.map(c => c.name),
+          labels: topCustomers.value.map(c => c.name),
           datasets: [{
             label: 'Total Spending',
-            data: this.topCustomers.map(c => c.total),
-            backgroundColor: '#6366f1',
-            borderColor: '#6366f1',
+            data: topCustomers.value.map(c => c.total),
+            backgroundColor: colorSchemes[0].slice(0, topCustomers.value.length),
+            borderColor: colorSchemes[0].slice(0, topCustomers.value.length),
             borderWidth: 1
           }]
         },
@@ -452,38 +607,38 @@ export default {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (context) => `${this.formatCurrency(context.raw)} (${this.topCustomers[context.dataIndex].orders} orders)`
+                label: (context) => `${formatCurrency(context.raw)} (${topCustomers.value[context.dataIndex].orders} orders)`
               }
             },
             datalabels: {
               anchor: 'end',
               align: 'top',
-              formatter: (value) => this.formatCurrency(value),
-              color: '#4b5563'
+              formatter: (value) => formatCurrency(value),
+              color: '#4b5563',
+              font: { weight: 'bold' }
             }
           },
           scales: {
             y: {
               beginAtZero: true,
               ticks: {
-                callback: (value) => this.formatCurrency(value)
+                callback: (value) => formatCurrency(value)
               }
             }
           }
         },
         plugins: [ChartDataLabels]
       };
-    },
-    getProductsChartConfig() {
+    };
+
+    const getProductsChartConfig = () => {
       return {
         type: 'doughnut',
         data: {
-          labels: this.topProducts.map(p => p.name),
+          labels: topProducts.value.map(p => p.name),
           datasets: [{
-            data: this.topProducts.map(p => p.revenue),
-            backgroundColor: [
-              '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'
-            ],
+            data: topProducts.value.map(p => p.revenue),
+            backgroundColor: colorSchemes[2].slice(0, topProducts.value.length),
             borderWidth: 1
           }]
         },
@@ -496,10 +651,10 @@ export default {
             tooltip: {
               callbacks: {
                 label: (context) => {
-                  const product = this.topProducts[context.dataIndex];
+                  const product = topProducts.value[context.dataIndex];
                   return [
                     `Product: ${product.name}`,
-                    `Revenue: ${this.formatCurrency(product.revenue)}`,
+                    `Revenue: ${formatCurrency(product.revenue)}`,
                     `Quantity Sold: ${product.quantity}`
                   ];
                 }
@@ -507,8 +662,8 @@ export default {
             },
             datalabels: {
               formatter: (value, context) => {
-                const product = this.topProducts[context.dataIndex];
-                return `${product.name}\n${this.formatCurrency(value)}`;
+                const product = topProducts.value[context.dataIndex];
+                return `${product.name}\n${formatCurrency(value)}`;
               },
               color: '#fff',
               font: { weight: 'bold', size: 10 }
@@ -517,15 +672,16 @@ export default {
         },
         plugins: [ChartDataLabels]
       };
-    },
-    getDeliveryChartConfig() {
+    };
+
+    const getDeliveryChartConfig = () => {
       return {
         type: 'polarArea',
         data: {
           labels: ['On Time', 'Late', 'No Date'],
           datasets: [{
-            data: [this.deliveryPerformance.onTime, this.deliveryPerformance.late, this.deliveryPerformance.noDate],
-            backgroundColor: ['#10b981', '#ef4444', '#6b7280'],
+            data: [deliveryPerformance.value.onTime, deliveryPerformance.value.late, deliveryPerformance.value.noDate],
+            backgroundColor: [colorSchemes[1][0], colorSchemes[3][0], '#6b7280'],
             borderWidth: 1
           }]
         },
@@ -549,25 +705,66 @@ export default {
           }
         }
       };
-    },
-    formatCurrency(value) {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(value);
-    },
-    formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString();
-    },
-    getStatusClass(status) {
-      const classes = {
-        'Pending': 'status-pending',
-        'Dispatched': 'status-dispatched',
-        'Completed': 'status-completed',
-        'Canceled': 'status-canceled'
+    };
+
+    const cardStyle = (index) => {
+      const colors = [
+        { border: '#4f46e5', bg: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)' },
+        { border: '#10b981', bg: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)' },
+        { border: '#6366f1', bg: 'linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%)' },
+        { border: '#ec4899', bg: 'linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%)' }
+      ];
+      return {
+        borderLeft: `4px solid ${colors[index].border}`,
+        background: colors[index].bg
       };
-      return classes[status] || '';
-    }
+    };
+
+    const metricStyle = (index) => {
+      const styles = [
+        { bg: '#d1fae5', text: '#065f46', border: '#10b981' },
+        { bg: '#fee2e2', text: '#b91c1c', border: '#ef4444' },
+        { bg: '#e5e7eb', text: '#1f2937', border: '#6b7280' }
+      ];
+      return {
+        backgroundColor: styles[index].bg,
+        color: styles[index].text,
+        border: `1px solid ${styles[index].border}`
+      };
+    };
+
+    const positiveStyle = { color: '#10b981' };
+    const negativeStyle = { color: '#ef4444' };
+
+    return {
+      selectedPeriod,
+      selectedYear,
+      selectedChartType,
+      availableYears,
+      totalRevenue,
+      totalOrders,
+      activeCustomers,
+      avgOrderValue,
+      revenueChange,
+      orderChange,
+      customerChange,
+      aovChange,
+      topCustomers,
+      topProducts,
+      deliveryPerformance,
+      deliveryMetrics,
+      salesChart,
+      ordersChart,
+      customersChart,
+      productsChart,
+      deliveryChart,
+      formatCurrency,
+      cardStyle,
+      metricStyle,
+      positiveStyle,
+      negativeStyle,
+      updateCharts
+    };
   }
 };
 </script>
@@ -577,31 +774,36 @@ export default {
   padding: 1rem;
   font-family: 'Inter', sans-serif;
   color: #1f2937;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-.dashboard-header {
+.dashboard-controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+  align-items: center;
 }
 
-.dashboard-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.header-controls {
+.control-group {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.control-select, .filter-select, .filter-input {
+.control-group label {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.control-group select {
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   background-color: white;
   font-size: 0.875rem;
+  min-width: 120px;
 }
 
 .summary-cards {
@@ -636,6 +838,12 @@ export default {
   margin-bottom: 0.25rem;
 }
 
+.card-content .change-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
 .chart-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -659,6 +867,7 @@ export default {
 .chart-wrapper {
   position: relative;
   height: 300px;
+  width: 100%;
 }
 
 .performance-metrics {
@@ -679,129 +888,22 @@ export default {
   font-size: 1.125rem;
 }
 
-.table-container {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.table-container h2 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.table-filters {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  text-align: left;
-  padding: 0.75rem;
-  background-color: #f9fafb;
+.performance-metrics > div > div:last-child {
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-}
-
-td {
-  padding: 1rem;
-  border-top: 1px solid #e5e7eb;
-  font-size: 0.875rem;
-}
-
-.customer-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.customer-cell img {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  object-fit: cover;
-}
-
-.product-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.product-tags span {
-  background-color: #e0e7ff;
-  color: #4f46e5;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-dispatched {
-  background-color: #dbeafe;
-  color: #1e40af;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-completed {
-  background-color: #dcfce7;
-  color: #166534;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-canceled {
-  background-color: #fee2e2;
-  color: #991b1b;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 @media (max-width: 768px) {
-  .dashboard-header {
+  .dashboard-controls {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
   }
   
-  .header-controls {
+  .control-group {
     width: 100%;
-    flex-wrap: wrap;
   }
   
-  .control-select {
-    flex-grow: 1;
-    min-width: 120px;
+  .control-group select {
+    width: 100%;
   }
   
   .chart-row {
@@ -816,10 +918,6 @@ td {
 @media (max-width: 480px) {
   .summary-cards {
     grid-template-columns: 1fr;
-  }
-  
-  .table-filters {
-    flex-direction: column;
   }
 }
 </style>
