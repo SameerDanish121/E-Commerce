@@ -127,44 +127,45 @@
                       </div>
                     </div> -->
                     <div class="customer-details">
-  <h6 class="section-title">Customer Details</h6>
+                      <h6 class="section-title">Customer Details</h6>
 
-  <div class="d-flex align-items-center mb-3">
-    <div class="customer-avatar me-3">
-      <img :src="order.customer.profile_pic || '/images/default-profile.png'" class="rounded-circle"
-        width="50" height="50" alt="Customer Profile Picture">
-    </div>
-    <div>
-      <h6 class="mb-0">{{ order.customer.name }}</h6>
-      <small class="text-muted">{{ order.customer.phone_no }}</small>
-    </div>
-  </div>
+                      <div class="d-flex align-items-center mb-3">
+                        <div class="customer-avatar me-3">
+                          <img :src="order.customer.profile_pic || '/images/default-profile.png'" class="rounded-circle"
+                            width="50" height="50" alt="Customer Profile Picture">
+                        </div>
+                        <div>
+                          <h6 class="mb-0">{{ order.customer.name }}</h6>
+                          <small class="text-muted">{{ order.customer.phone_no }}</small>
+                        </div>
+                      </div>
 
-  <div class="customer-meta">
-    <!-- Gender -->
-    <p class="small mb-1">
-      <i v-if="order.customer.gender === 'Male'" class="bi bi-gender-male me-2 text-primary"></i>
-      <i v-else-if="order.customer.gender === 'Female'" class="bi bi-gender-female me-2 text-danger"></i>
-      <i v-else class="bi bi-gender-ambiguous me-2 text-muted"></i>
-      <strong>Gender:</strong>
-      {{ order.customer.gender || 'Not specified' }}
-    </p>
+                      <div class="customer-meta">
+                        <!-- Gender -->
+                        <p class="small mb-1">
+                          <i v-if="order.customer.gender === 'Male'" class="bi bi-gender-male me-2 text-primary"></i>
+                          <i v-else-if="order.customer.gender === 'Female'"
+                            class="bi bi-gender-female me-2 text-danger"></i>
+                          <i v-else class="bi bi-gender-ambiguous me-2 text-muted"></i>
+                          <strong>Gender:</strong>
+                          {{ order.customer.gender || 'Not specified' }}
+                        </p>
 
-    <!-- Date of Birth -->
-    <p class="small mb-1">
-      <i class="bi bi-calendar-date me-2"></i>
-      <strong>Date of Birth:</strong>
-      {{ order.customer.dob ? formatDate(order.customer.dob) : 'Not specified' }}
-    </p>
+                        <!-- Date of Birth -->
+                        <p class="small mb-1">
+                          <i class="bi bi-calendar-date me-2"></i>
+                          <strong>Date of Birth:</strong>
+                          {{ order.customer.dob ? formatDate(order.customer.dob) : 'Not specified' }}
+                        </p>
 
-    <!-- Address -->
-    <p class="small mb-0">
-      <i class="bi bi-geo-alt-fill me-2"></i>
-      <strong>Address:</strong>
-      {{ order.customer.address || 'Not specified' }}
-    </p>
-  </div>
-</div>
+                        <!-- Address -->
+                        <p class="small mb-0">
+                          <i class="bi bi-geo-alt-fill me-2"></i>
+                          <strong>Address:</strong>
+                          {{ order.customer.address || 'Not specified' }}
+                        </p>
+                      </div>
+                    </div>
 
                   </div>
                   <div class="col-md-5">
@@ -231,7 +232,7 @@
                 </div>
               </div>
 
-              <div class="card-footer">
+              <!-- <div class="card-footer">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <small class="text-muted">
@@ -250,12 +251,11 @@
                       </button>
                     </template>
 
-                    <template v-else-if="order.status === 'Dispatched'">
+<template v-else-if="order.status === 'Dispatched'">
                       <div class="d-flex align-items-center">
                         <div class="me-3" v-if="!isCompletingOrder[order.order_id]">
                           <label class="form-label small mb-0 me-2">Delivery Date:</label>
-                          <!-- <input type="date" v-model="deliveryDates[order.order_id]"
-                            class="form-control form-control-sm"> -->
+                         
                           <input type="date" v-model="deliveryDates[order.order_id]"
                             class="form-control form-control-sm" :max="new Date().toISOString().split('T')[0]"
                             :min="new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0]"
@@ -275,8 +275,61 @@
                       </div>
                     </template>
 
-                    <template v-else>
+<template v-else>
                       <span class="text-muted small">No actions available</span>
+                    </template>
+</div>
+</div>
+</div> -->
+
+              <div class="card-footer">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                  <div class="mb-2 mb-sm-0 text-center text-sm-start">
+                    <small class="text-muted">
+                      Last updated: {{ formatDateTime(order.updated_at || order.order_datetime) }}
+                    </small>
+                  </div>
+                  <div class="order-actions w-100 w-sm-auto">
+                    <template v-if="order.status === 'Pending'">
+                      <div class="d-flex justify-content-center justify-content-sm-end flex-wrap gap-2">
+                        <button v-if="adminStore.hasPermission('Dispatch Order')"
+                          class="btn btn-sm btn-outline-success me-sm-2">
+                          <i class="bi bi-truck me-1"></i> Dispatch
+                        </button>
+                        <button v-if="adminStore.hasPermission('Cancel Order')" class="btn btn-sm btn-outline-danger">
+                          <i class="bi bi-x-circle me-1"></i> Cancel
+                        </button>
+                      </div>
+                    </template>
+
+                    <template v-else-if="order.status === 'Dispatched'">
+
+                      <div
+                        class="d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-sm-end gap-2">
+                        <div class="me-sm-3" v-if="!isCompletingOrder[order.order_id]">
+
+                          <div class="d-flex align-items-center flex-wrap justify-content-center">
+                            <input type="date" v-model="deliveryDates[order.order_id]"
+                              class="form-control form-control-sm" :max="new Date().toISOString().split('T')[0]"
+                              :min="new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0]"
+                              @keydown.prevent>
+                          </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                          <button v-if="adminStore.hasPermission('Complete Order')"
+                            class="btn btn-sm btn-success me-sm-2" :disabled="!deliveryDates[order.order_id]">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ isCompletingOrder[order.order_id] ? 'Completing...' : 'Complete' }}
+                          </button>
+                          <button v-if="adminStore.hasPermission('Cancel Order')" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+
+                    <template v-else>
+                      <span class="text-muted small d-block text-center text-sm-end">No actions available</span>
                     </template>
                   </div>
                 </div>
@@ -354,7 +407,7 @@ const processOrder = async (orderId, status) => {
       timer: 1500,
       showConfirmButton: false
     });
-     await orderStore.fetchAllOrders();
+    await orderStore.fetchAllOrders();
   } catch (error) {
     Swal.fire({
       icon: 'error',
@@ -383,7 +436,7 @@ const completeOrder = async (orderId) => {
       timer: 2000,
       showConfirmButton: false
     });
-     await orderStore.fetchAllOrders();
+    await orderStore.fetchAllOrders();
   } catch (error) {
     Swal.fire({
       icon: 'error',
@@ -503,9 +556,9 @@ const confirmCancelOrder = (orderId) => {
     gap: 0.5rem;
   }
 
-  .order-actions .btn {
+  /* .order-actions .btn {
     width: 100%;
-  }
+  } */
 
   .delivery-info {
     margin-top: 1rem;

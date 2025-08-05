@@ -17,76 +17,80 @@ class CustomerController extends Controller
 
     public function updateCustomerProfile(Request $request, $id)
     {
-        $customer = customers::find($id);
+        try {
+            $customer = customers::find($id);
 
-        if (!$customer) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Customer not found.',
-            ], 404);
-        }
-
-
-        $user = users::find($customer->user_id);
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Associated user not found.',
-            ], 404);
-        }
-        $validator = Validator::make($request->all(), [
-            'name' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'phone_no' => 'nullable|string|max:20',
-            'dob' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other',
-            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'username' => 'nullable|string|max:255',
-            'email' => 'nullable',
-            'password' => 'nullable|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        $data = $validator->validated();
-        foreach (['name', 'address', 'phone_no', 'dob', 'gender'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $customer->$field = $data[$field];
+            if (!$customer) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Customer not found.',
+                ], 404);
             }
-        }
-        if ($request->hasFile('profile_pic')) {
-            $file = $request->file('profile_pic');
-            $filename = 'customer_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('profile_pics'), $filename);
-            $customer->profile_pic = 'profile_pics/' . $filename;
-        }
+            $user = users::find($customer->user_id);
 
-        $customer->save();
-        foreach (['username', 'email'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $user->$field = $data[$field];
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Associated user not found.',
+                ], 404);
             }
-        }
+            $validator = Validator::make($request->all(), [
+                'name' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:500',
+                'phone_no' => 'nullable|string|max:20',
+                'dob' => 'nullable|date',
+                'gender' => 'nullable|in:male,female,other',
+                'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'username' => 'nullable|string|max:255',
+                'email' => 'nullable',
+                'new_password' => 'nullable|string',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+            $data = $validator->validated();
+            foreach (['name', 'address', 'phone_no', 'dob', 'gender'] as $field) {
+                if (array_key_exists($field, $data)) {
+                    $customer->$field = $data[$field];
+                }
+            }
+            if ($request->hasFile('profile_pic')) {
+                $file = $request->file('profile_pic');
+                $filename = 'customer_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('profile_pics'), $filename);
+                $customer->profile_pic = 'profile_pics/' . $filename;
+            }
+            $customer->save();
+            foreach (['username', 'email'] as $field) {
+                if (array_key_exists($field, $data)) {
+                    $user->$field = $data[$field];
+                }
+            }
 
-        if (isset($data['password'])) {
-            $user->password = bcrypt($data['password']);
-        }
+            if (isset($data['new_password'])) {
+                $user->password = $data['new_password'];
+            }
 
-        $user->save();
-        $imageUrl = $customer->profile_pic ? asset($customer->profile_pic) : null;
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Customer and associated user updated successfully.',
-            'customer' => $customer,
-            'user' => $user,
-            'profile_pic_url' => $imageUrl,
-        ]);
+            $user->save();
+            $customer->users = $user;
+
+            $customer->profile_pic = $customer->profile_pic ? asset($customer->profile_pic) : null;
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Customer and associated user updated successfully.',
+                'customer' => $customer,
+                'user' => $user,
+                'profile_pic_url' => $customer->profile_pic,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
     }
     public function allCustomer()
     {

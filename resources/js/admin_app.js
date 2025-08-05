@@ -10,11 +10,11 @@ import { useNotification } from "@kyvg/vue3-notification";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { io } from "socket.io-client";
 import { setupSocketEventListeners } from '../js/EventHandler.js';
-
-import { Chart as ChartJS } from 'chart.js'
-import zoomPlugin from 'chartjs-plugin-zoom'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
-ChartJS.register(zoomPlugin, ChartDataLabels)
+import { Chart as ChartJS } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+// import '@fortawesome/fontawesome-free/css/all.css';
+ChartJS.register(zoomPlugin, ChartDataLabels);
 
 
 const socket = io("http://localhost:3001", {

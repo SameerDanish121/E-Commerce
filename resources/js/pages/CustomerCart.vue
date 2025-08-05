@@ -45,7 +45,7 @@
                     <p class="mb-0 text-primary fw-bold">Rs {{ item.price.toLocaleString('en-IN') }}</p>
                     <p class="small text-muted mb-0">Available: {{ item.stock }}</p>
                   </div>
-                  <div class="col-4 col-md-3">
+                  <!-- <div class="col-4 col-md-3">
                     <div class="input-group quantity-control">
                       <button class="btn btn-outline-secondary" type="button" @click="decreaseQuantity(item)"
                         :disabled="item.quantity <= 1">
@@ -57,7 +57,22 @@
                         <i class="bi bi-plus-lg"></i>
                       </button>
                     </div>
+                  </div> -->
+                  <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="input-group quantity-control flex-nowrap">
+                      <button class="btn btn-outline-secondary btn-sm quantity-btn" type="button"
+                        @click="decreaseQuantity(item)" :disabled="item.quantity <= 1">
+                        <i class="bi bi-dash-lg"></i>
+                      </button>
+                      <input type="text" class="form-control text-center quantity-input" :value="item.quantity"
+                        readonly>
+                      <button class="btn btn-outline-secondary btn-sm quantity-btn" type="button"
+                        @click="increaseQuantity(item)" :disabled="item.quantity >= item.stock">
+                        <i class="bi bi-plus-lg"></i>
+                      </button>
+                    </div>
                   </div>
+
                   <div class="col-12 col-md-3 mt-3 mt-md-0 text-md-end">( Quantity x Price )
                     <p class="mb-1 fw-bold">Rs {{ (item.price * item.quantity).toLocaleString('en-IN') }}</p>
                     <button class="btn btn-link text-danger p-0 small" @click="removeItem(item.id)">
@@ -575,6 +590,7 @@ const placeOrder = async (paymentMethod) => {
   font-size: 1.25rem;
   color: rgba(255, 255, 255, 0.9);
 }
+
 .cart-hero-header {
   position: relative;
   z-index: 1;
@@ -737,4 +753,41 @@ const placeOrder = async (paymentMethod) => {
     padding: 1rem;
   }
 }
+/* Default (desktop) */
+.quantity-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 1rem;
+}
+
+.quantity-input {
+  font-size: 1rem;
+  min-width: 50px;
+}
+
+/* Responsive for less than 800px */
+@media (max-width: 800px) {
+  .quantity-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .quantity-input {
+    font-size: 0.85rem;
+    min-width: 40px;
+  }
+}
+
+/* Extra small (like 270px) */
+@media (max-width: 300px) {
+  .quantity-btn {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.75rem;
+  }
+
+  .quantity-input {
+    font-size: 0.75rem;
+    min-width: 30px;
+  }
+}
+
 </style>

@@ -7,14 +7,6 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TestController;
 
-// Route::prefix('employees')->group(function () {
-//     Route::get('/', [TestController::class, 'index']);        // All employees
-//     Route::post('/', [TestController::class, 'store']);       // Create
-//     Route::get('{id}', [TestController::class, 'show']);      // Get one
-//     Route::put('{id}', [TestController::class, 'update']);    // Update
-//     Route::delete('{id}', [TestController::class, 'destroy']); // Delete
-// });
-
 
 Route::get('/employees', [TestController::class, 'index']);
 Route::post('/employees', [TestController::class, 'store']);
@@ -26,12 +18,10 @@ Route::delete('/employees/{id}', [TestController::class, 'destroy']);
 Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/admin/update-profile/{id}', [AdminController::class, 'updateAdminProfile']);
 Route::prefix('admin')->name('Admin.')->group(function () {
     Route::get('/{any}', [AdminController::class, 'index'])->where('any', '.*');;
 });
-
-
-
 Route::prefix('customer')->name('Customer.')->group(function () {
      Route::get('/{any}', [CustomerController::class, 'index'])->where('any', '.*');
 });
@@ -47,7 +37,7 @@ Route::get('/customer-orders/{customer_id}', [AuthController::class, 'getCustome
 
 
 //ADMIN
-Route::post('/admin/update-profile/{id}', [AdminController::class, 'updateAdminProfile']);
+
 
 Route::get('/Getproducts', [AdminController::class, 'getAllProducts']);
 Route::post('/product/add', [AdminController::class, 'addProduct']);
@@ -67,13 +57,6 @@ Route::get('/permissions', [AdminController::class, 'getAllPermissions']);
 Route::post('/permissions', [AdminController::class, 'createPermission']);
 Route::put('/permissions/{id}', [AdminController::class, 'updatePermission']);
 Route::delete('/permissions/{id}', [AdminController::class, 'deletePermission']);
-
-Route::prefix('analytics')->group(function () {
-    Route::get('/sales', [AdminController::class, , 'getSalesAnalytics']);
-    Route::get('/top-customers', [AdminController::class, 'getTopCustomers']);
-    Route::get('/top-products', [AdminController::class, 'getTopProducts']);
-});
-
 
 //ADMIN PERMISSIONS
 Route::post('/assign-permission', [AdminController::class, 'assignPermissionToAdmin']);

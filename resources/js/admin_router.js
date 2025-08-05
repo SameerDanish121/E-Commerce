@@ -9,14 +9,12 @@ import ChartDashboard from './admin_pages/admin_analytics.vue';
 import { useAdminStore } from '../js/stores/adminStore';
 
 const routes = [
+  { path: '/chart', name: 'Home', component : ChartDashboard },
   { path: '/home', name: 'Product', component: AdminrHome, meta: { permission: 'Manage Product' } },
   { path: '/customer', name: 'Customer', component: AdminCustomer, meta: { permission: 'Manage Customer' }  },
   { path: '/orders', name: 'Orders', component: AdminOrders, meta: { permission: 'Manage Orders' }  },
-  { path: '/manage', name: 'Admin User', component: AdminManage, meta: { permission: 'Add Admin' } },
+  { path: '/manage', name: 'Admin', component: AdminManage, meta: { permission: 'Add Admin' } },
   { path: '/profile', name: 'Profile', component: AdminProfile },
- { path: '/chart', name: 'Analytics', component:ChartDashboard },
-
- 
 ];
 const router = createRouter({
   history: createWebHistory('/admin/'),
@@ -27,7 +25,6 @@ router.beforeEach((to, from, next) => {
 
   const requiredPermission = to.meta.permission;
   if (requiredPermission && !adminStore.hasPermission(requiredPermission)) {
-    // alert('Access denied. You don’t have permission: ' + requiredPermission);
     return next('/profile');
   }
   next();

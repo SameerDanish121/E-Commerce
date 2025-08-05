@@ -17,9 +17,6 @@
                   <div v-else class="avatar-placeholder rounded-circle border-4 border-white shadow">
                     <i class="bi bi-person fs-1 text-muted"></i>
                   </div>
-                  <!-- <button class="avatar-edit-btn btn btn-primary rounded-circle shadow-sm" @click="showEditModal">
-                    <i class="bi bi-pencil"></i>
-                  </button> -->
                 </div>
               </div>
 
@@ -78,9 +75,8 @@
                       <span class="text-muted fw-semibold d-inline-block" style="width: 130px;">
                         <i class="bi bi-geo-alt me-2"></i>Address:   
                       </span>
-                      <span>    {{customer.address || 'Not provided' }}</span>
+                      <span>{{customer.address || 'Not provided' }}</span>
                     </li>
-
                   </ul>
                 </div>
               </div>
@@ -113,10 +109,6 @@
                       <input id="profilePicUpload" type="file" accept="image/*" @change="handleProfilePicChange"
                         class="d-none">
                     </label>
-                    <!-- <button v-if="customer.profile_pic || tempProfilePic" type="button"
-                      class="btn btn-sm btn-outline-danger mt-2 d-block mx-auto" @click="removeProfilePic">
-                      Remove
-                    </button> -->
                   </div>
                 </div>
                 <div class="col-md-8">
@@ -175,16 +167,8 @@
                         <div class="accordion-body pt-0">
                           <div class="row g-3">
                             <div class="col-md-6">
-                              <label class="form-label">Current Password</label>
-                              <input type="password" class="form-control" v-model="formData.current_password">
-                            </div>
-                            <div class="col-md-6">
                               <label class="form-label">New Password</label>
                               <input type="password" class="form-control" v-model="formData.new_password">
-                            </div>
-                            <div class="col-md-6">
-                              <label class="form-label">Confirm Password</label>
-                              <input type="password" class="form-control" v-model="formData.new_password_confirmation">
                             </div>
                           </div>
                         </div>
@@ -213,7 +197,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { useCustomerStore } from '../stores/customerStore';
 import { ref, computed, onMounted } from 'vue';
@@ -224,12 +207,7 @@ import { Modal } from 'bootstrap';
 
 export default {
   setup() {
-
-
-
     const customerStore = useCustomerStore();
-
-
     const toast = useToast();
     const isSubmitting = ref(false);
     const tempProfilePic = ref(null);
@@ -243,23 +221,17 @@ export default {
       dob: customerStore.dob,
       gender: customerStore.gender,
       email: '',
-      current_password: '',
       new_password: '',
-      new_password_confirmation: '',
       profile_pic: customerStore.profile_pic
     });
-
     onMounted(async () => {
-
       editModal = new Modal(document.getElementById('editProfileModal'));
     });
-
     const formattedJoinDate = computed(() => {
       if (!customerStore.created_at) return '';
       const date = new Date(customerStore.created_at);
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
     });
-
     const formatDate = (dateString) => {
       if (!dateString) return '';
       const date = new Date(dateString);
@@ -269,7 +241,6 @@ export default {
         day: 'numeric'
       });
     };
-
     const handleProfilePicChange = (event) => {
       const file = event.target.files[0];
       if (file) {
@@ -296,9 +267,7 @@ export default {
         dob: customerStore.dob,
         gender: customerStore.gender,
         email: customerStore.email,
-        current_password: '',
         new_password: '',
-        new_password_confirmation: '',
         remove_profile_pic: false
       };
       tempProfilePic.value = null;
@@ -377,7 +346,6 @@ export default {
   }
 };
 </script>
-
 <style scoped>
 .profile-page {
   padding: 2rem 0;

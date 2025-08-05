@@ -16,6 +16,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.0.0",
         "@kyvg/vue3-notification": "^3.4.1",
         "@motionone/dom": "^10.18.0",
         "bootstrap-icons": "^1.13.1",

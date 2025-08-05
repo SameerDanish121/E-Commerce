@@ -1,6 +1,6 @@
 <template>
   <div class="admin-products-page">
-    <section class="admin-header">
+    <!-- <section class="admin-header">
       <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center py-4">
           <h1 class="page-title">Product Management</h1>
@@ -9,7 +9,22 @@
           </button>
         </div>
       </div>
+    </section> -->
+    <section class="admin-header">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center py-3">
+          <h1 class="page-title mb-0 text-truncate" style="max-width: 60%; font-size: 1.25rem;">
+            Product Management
+          </h1>
+
+          <button v-if="adminStore.hasPermission('Add Product')" class="btn btn-primary text-nowrap px-2 py-2"
+            style="font-size: 0.9rem;" @click="openAddProductModal">
+            <i class="bi bi-plus-circle me-1"></i>Add Product
+          </button>
+        </div>
+      </div>
     </section>
+
 
     <section class="filters-section py-3 bg-light">
       <div class="container-fluid">
@@ -71,8 +86,14 @@
                       </div>
                     </td>
                   </tr>
-                  <tr v-else-if="filteredProducts.length === 0">
+                  <!-- <tr v-else-if="filteredProducts.length === 0">
                     <td colspan="8" class="text-center py-5">
+                      <h5>No products found</h5>
+                      <p class="text-muted">Try adjusting your search or filter criteria</p>
+                    </td>
+                  </tr> -->
+                  <tr v-else-if="filteredProducts.length === 0" colspan="8">
+                    <td class="text-center py-5">
                       <h5>No products found</h5>
                       <p class="text-muted">Try adjusting your search or filter criteria</p>
                     </td>
@@ -84,9 +105,15 @@
                         class="product-thumbnail">
                     </td>
                     <td>
-                      <strong>{{ product.name }}</strong>
-                      <!-- <p class="text-muted small mb-0 truncate-text">{{ product.description }}</p> -->
-                      <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
+                      <!-- <strong>{{ product.name }}</strong> -->
+                      <strong class="text-truncate d-inline-block" style="max-width: 100%;">
+                        {{ product.name }}
+                      </strong>
+
+                      <!-- <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
+                        {{ product.description }}
+                      </p> -->
+                      <p class="text-muted small mb-0 text-truncate d-none d-md-block" style="max-width: 200px;">
                         {{ product.description }}
                       </p>
 
@@ -272,99 +299,81 @@
             </form>
           </div> -->
 
-         <div class="modal-body">
-  <form @submit.prevent="validateAndSubmit">
-    <div class="row">
-      <div class="col-md-6">
-        <div class="mb-3">
-          <label class="form-label">Product Name</label>
-          <input v-model="productForm.name" 
-                 @blur="validateField('name')"
-                 :class="{'is-invalid': errors.name}"
-                 type="text" class="form-control" 
-                 maxlength="100" required 
-                 placeholder="Enter product name">
-          <div class="invalid-feedback">{{ errors.name }}</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Category</label>
-          <input v-model="productForm.category" 
-                 @blur="validateField('category')"
-                 :class="{'is-invalid': errors.category}"
-                 type="text" class="form-control" 
-                 maxlength="50" required 
-                 placeholder="Enter product category">
-          <div class="invalid-feedback">{{ errors.category }}</div>
-        </div>
-        <label class="form-label">Price</label>
-        <div class="input-group mb-3">
-          <span class="input-group-text">Rs</span>
-          <input v-model="productForm.price" 
-                 @blur="validateField('price')"
-                 :class="{'is-invalid': errors.price}"
-                 type="number" class="form-control" 
-                 min="1" max="1000000" step="0.01" required 
-                 placeholder="e.g., 499.99">
-        </div>
-        <div class="invalid-feedback d-block">{{ errors.price }}</div>
-      </div>
-      <div class="col-md-6">
-        <div class="mb-3">
-          <label class="form-label">Stock Quantity</label>
-          <input v-model="productForm.stock" 
-                 @blur="validateField('stock')"
-                 :class="{'is-invalid': errors.stock}"
-                 type="number" class="form-control" 
-                 min="0" max="1000000" required 
-                 placeholder="e.g., 100">
-          <div class="invalid-feedback">{{ errors.stock }}</div>
-        </div>
+          <div class="modal-body">
+            <form @submit.prevent="validateAndSubmit">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Product Name *</label>
+                    <input v-model="productForm.name" @blur="validateField('name')"
+                      :class="{ 'is-invalid': errors.name }" type="text" class="form-control" maxlength="100" required
+                      placeholder="Enter product name">
+                    <div class="invalid-feedback">{{ errors.name }}</div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Category *</label>
+                    <input v-model="productForm.category" @blur="validateField('category')"
+                      :class="{ 'is-invalid': errors.category }" type="text" class="form-control" maxlength="50"
+                      required placeholder="Enter product category">
+                    <div class="invalid-feedback">{{ errors.category }}</div>
+                  </div>
+                  <label class="form-label">Price *</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">Rs</span>
+                    <input v-model="productForm.price" @blur="validateField('price')"
+                      :class="{ 'is-invalid': errors.price }" type="number" class="form-control" min="1" max="1000000"
+                      step="0.01" required placeholder="e.g., 499.99">
+                  </div>
+                  <div class="invalid-feedback d-block">{{ errors.price }}</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Stock Quantity *</label>
+                    <input v-model="productForm.stock" @blur="validateField('stock')"
+                      :class="{ 'is-invalid': errors.stock }" type="number" class="form-control" min="0" max="1000000"
+                      required placeholder="e.g., 100">
+                    <div class="invalid-feedback">{{ errors.stock }}</div>
+                  </div>
 
-        <div class="mb-3">
-          <label class="form-label">Status</label>
-          <select v-model="productForm.is_active" class="form-select">
-            <option :value="true">Active</option>
-            <option :value="false">Inactive</option>
-          </select>
-        </div>
+                  <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select v-model="productForm.is_active" class="form-select">
+                      <option :value="true">Active</option>
+                      <option :value="false">Inactive</option>
+                    </select>
+                  </div>
 
-        <div class="mb-3">
-          <label class="form-label">Product Image</label>
-          <input type="file" 
-                 class="form-control" 
-                 :class="{'is-invalid': errors.image}"
-                 accept="image/*" 
-                 @change="handleImageUpload"
-                 ref="fileInput">
-          <small class="text-muted">Only jpeg, png, jpg (max 2MB)</small>
-          <div class="invalid-feedback">{{ errors.image }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Description</label>
-      <textarea v-model="productForm.description" 
-                @blur="validateField('description')"
-                :class="{'is-invalid': errors.description}"
-                class="form-control" rows="3" maxlength="255"
-                style="resize: none;"></textarea>
-      <div class="form-text">
-        {{ productForm.description.length }}/255 characters
-      </div>
-      <div class="invalid-feedback">{{ errors.description }}</div>
-    </div>
+                  <div class="mb-3">
+                    <label class="form-label">Product Image</label>
+                    <input type="file" class="form-control" :class="{ 'is-invalid': errors.image }" accept="image/*"
+                      @change="handleImageUpload" ref="fileInput">
+                    <small class="text-muted">Only jpeg, png, jpg (max 2MB)</small>
+                    <div class="invalid-feedback">{{ errors.image }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea v-model="productForm.description" @blur="validateField('description')"
+                  :class="{ 'is-invalid': errors.description }" class="form-control" rows="3" maxlength="255"
+                  style="resize: none;"></textarea>
+                <div class="form-text">
+                  {{ productForm.description.length }}/255 characters
+                </div>
+                <div class="invalid-feedback">{{ errors.description }}</div>
+              </div>
 
-    <div class="d-flex justify-content-end gap-2">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-        Cancel
-      </button>
-      <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-        <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
-        {{ isEditing ? 'Update Product' : 'Add Product' }}
-      </button>
-    </div>
-  </form>
-</div>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                  <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
+                  {{ isEditing ? 'Update Product' : 'Add Product' }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -665,7 +674,7 @@ const handleImageUpload = (event) => {
 
 const validateAllFields = () => {
   let isValid = true;
-  
+
   // Validate name
   if (!productForm.value.name) {
     errors.value.name = 'Product name is required';
@@ -676,7 +685,7 @@ const validateAllFields = () => {
   } else {
     errors.value.name = '';
   }
-  
+
   // Validate category
   if (!productForm.value.category) {
     errors.value.category = 'Category is required';
@@ -687,7 +696,7 @@ const validateAllFields = () => {
   } else {
     errors.value.category = '';
   }
-  
+
   // Validate price
   if (!productForm.value.price) {
     errors.value.price = 'Price is required';
@@ -701,7 +710,7 @@ const validateAllFields = () => {
   } else {
     errors.value.price = '';
   }
-  
+
   // Validate stock
   if (productForm.value.stock === '' || productForm.value.stock === null) {
     errors.value.stock = 'Stock quantity is required';
@@ -715,7 +724,7 @@ const validateAllFields = () => {
   } else {
     errors.value.stock = '';
   }
-  
+
   // Validate description
   if (productForm.value.description.length > 255) {
     errors.value.description = 'Description must be less than 255 characters';
@@ -723,12 +732,12 @@ const validateAllFields = () => {
   } else {
     errors.value.description = '';
   }
-  
+
   // Validate image (optional)
   if (productForm.value.image) {
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     const maxSize = 2 * 1024 * 1024; // 2MB
-    
+
     if (!validTypes.includes(productForm.value.image.type)) {
       errors.value.image = 'Only JPEG, PNG, or JPG images are allowed';
       isValid = false;
@@ -739,22 +748,20 @@ const validateAllFields = () => {
       errors.value.image = '';
     }
   }
-  
+
   return isValid;
 };
 
 const validateAndSubmit = async () => {
   const isValid = validateAllFields();
-  
+
   if (!isValid) {
     toast.error('Please fix all validation errors before submitting');
     return;
   }
-  
+
   await handleProductSubmit();
 };
-
-// Keep your existing handleProductSubmit function unchanged
 const handleProductSubmit = async () => {
   isSubmitting.value = true;
   try {
@@ -1022,6 +1029,249 @@ const handleRestockSubmit = async () => {
 
   .modal-dialog {
     margin: 0.5rem auto;
+  }
+}
+
+.admin-products-page {
+  padding-top: 1rem;
+}
+
+.admin-header {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.product-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.truncate-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Add these new styles for the no products message */
+.table-responsive .text-center {
+  padding: 2rem 1rem;
+}
+
+.table-responsive .text-center h5 {
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.table-responsive .text-center p.text-muted {
+  margin-bottom: 0;
+  word-break: break-word;
+}
+
+@media (max-width: 992px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  /* Ensure proper spacing on tablets */
+  .table-responsive .text-center {
+    padding: 3rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-section .row>div {
+    margin-bottom: 0.5rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+  }
+
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.75rem;
+    width: 45%;
+    padding-right: 1rem;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .table td:last-child {
+    border-bottom: 0;
+  }
+
+  .table td:nth-child(1)::before {
+    content: "Image";
+  }
+
+  .table td:nth-child(2)::before {
+    content: "Name";
+  }
+
+  .table td:nth-child(3)::before {
+    content: "Category";
+  }
+
+  .table td:nth-child(4)::before {
+    content: "Price";
+  }
+
+  .table td:nth-child(5)::before {
+    content: "Stock";
+  }
+
+  .table td:nth-child(6)::before {
+    content: "Sold";
+  }
+
+  .table td:nth-child(7)::before {
+    content: "Status";
+  }
+
+  .table td:nth-child(8)::before {
+    content: "Actions";
+  }
+
+  .product-thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+
+  .table td .d-flex {
+    justify-content: flex-end;
+  }
+
+  /* Mobile-specific no products message styling */
+  .table-responsive .text-center {
+    padding: 4rem 1rem;
+  }
+
+  .table-responsive .text-center h5 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-title {
+    margin-bottom: 1rem;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem auto;
+  }
+
+  /* Extra small devices */
+  .table-responsive .text-center {
+    padding: 3rem 0.5rem;
+  }
+
+  .table-responsive .text-center h5 {
+    font-size: 1.1rem;
+  }
+
+  .table-responsive .text-center p.text-muted {
+    font-size: 0.9rem;
+  }
+}
+
+.table tbody tr[colspan] {
+  display: table-row !important;
+}
+
+.table tbody tr[colspan] td {
+  display: table-cell !important;
+  /* Override mobile cell display */
+  padding: 2rem 1rem !important;
+  /* Add proper padding */
+  text-align: center !important;
+  width: 100% !important;
+  position: static !important;
+  /* Remove mobile positioning */
+}
+
+.table tbody tr[colspan] td::before {
+  display: none !important;
+  /* Hide mobile pseudo-elements */
+}
+
+/* Update the media queries */
+@media (max-width: 768px) {
+  /* ... (keep existing mobile styles) ... */
+
+  /* Ensure empty state looks good on mobile */
+  .table tbody tr[colspan] td {
+    padding: 3rem 1rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  /* ... (keep existing small device styles) ... */
+
+  /* Adjust empty state for very small screens */
+  .table tbody tr[colspan] td {
+    padding: 2rem 0.5rem !important;
+  }
+
+  .table tbody tr[colspan] h5 {
+    font-size: 1.1rem;
+  }
+
+  .table tbody tr[colspan] p.text-muted {
+    font-size: 0.9rem;
   }
 }
 </style>

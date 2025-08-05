@@ -19,7 +19,7 @@ class StripePaymentController extends Controller
     public function makePayment(Request $request)
     {
          
-        $newKey="_test_51Rm6j32eQaSAHXpWrDsuArvNH4gbI5u1KAyiocY1VgUtCPBGTkVdmyUqFejLSBMaziCerTRYmljMyuJxUrODKiTI00DJkB6wH8";
+        $newKey="sk_test_51Rm6j32eQaSAHXpWrDsuArvNH4gbI5u1KAyiocY1VgUtCPBGTkVdmyUqFejLSBMaziCerTRYmljMyuJxUrODKiTI00DJkB6wH8";
         Stripe::setApiKey($newKey);
 
         $amount = $request->amount * 100;  // amount in cents

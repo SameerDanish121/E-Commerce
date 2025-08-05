@@ -26,88 +26,97 @@ class AdminController extends Controller
     }
     public function updateAdminProfile(Request $request, $id)
     {
-        $admin = admins::find($id);
+        try {
+            $admin = admins::find($id);
 
-        if (!$admin) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Admin not found.',
-            ], 404);
-        }
-
-        $user = users::find($admin->user_id);
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Associated user not found.',
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'designation' => 'nullable|string|max:255',
-            'contact_no' => 'nullable|string|max:20|regex:/^[0-9]+$/',
-            'address' => 'nullable|string|max:500',
-            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6|max:255',
-        ], [
-            'contact_no.regex' => 'The phone number must contain only numbers.',
-            'profile_pic.max' => 'The profile picture must not be larger than 2MB.',
-            'profile_pic.mimes' => 'The profile picture must be a JPEG, PNG, or JPG image.',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        $data = $validator->validated();
-
-        // Update admin fields
-        $adminFields = ['name', 'designation', 'contact_no', 'address'];
-        foreach ($adminFields as $field) {
-            if (array_key_exists($field, $data)) {
-                $admin->$field = $data[$field];
-            }
-        }
-
-        // Handle profile picture
-        if ($request->hasFile('profile_pic')) {
-            // Delete old profile pic if exists
-            if ($admin->profile_pic && file_exists(public_path($admin->profile_pic))) {
-                unlink(public_path($admin->profile_pic));
+            if (!$admin) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Admin not found.',
+                ], 404);
             }
 
-            $file = $request->file('profile_pic');
-            $filename = 'admin_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('profile_pics'), $filename);
-            $admin->profile_pic = 'profile_pics/' . $filename;
+            $user = users::find($admin->user_id);
+
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Associated user not found.',
+                ], 404);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'designation' => 'nullable|string|max:255',
+                'contact_no' => 'nullable|string|max:20|regex:/^[0-9]+$/',
+                'address' => 'nullable|string|max:500',
+                'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
+                'password' => 'nullable|string|min:6|max:255',
+            ], [
+                'contact_no.regex' => 'The phone number must contain only numbers.',
+                'profile_pic.max' => 'The profile picture must not be larger than 2MB.',
+                'profile_pic.mimes' => 'The profile picture must be a JPEG, PNG, or JPG image.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $data = $validator->validated();
+
+            // Update admin-specific fields
+            $adminFields = ['name', 'designation', 'contact_no', 'address'];
+            foreach ($adminFields as $field) {
+                if (array_key_exists($field, $data)) {
+                    $admin->$field = $data[$field];
+                }
+            }
+            if ($request->hasFile('profile_pic')) {
+                if ($admin->profile_pic && file_exists(public_path($admin->profile_pic))) {
+                    @unlink(public_path($admin->profile_pic));
+                }
+                $file = $request->file('profile_pic');
+                $filename = 'admin_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('profile_pics'), $filename);
+                $admin->profile_pic = 'profile_pics/' . $filename;
+            }
+
+            $admin->save();
+
+            // Update user fields
+            if (!empty($data['email'])) {
+                $user->email = $data['email'];
+            }
+
+            if (!empty($data['password'])) {
+                $user->password = $data['password'];
+            }
+
+            $user->save();
+            $admin->user = $user;
+            // Return full profile pic URL
+            $admin->profile_pic = $admin->profile_pic ? asset($admin->profile_pic) : null;
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'admin' => $admin,
+                'user' => $user,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(), // You can remove this in production for security
+            ], 500);
         }
-
-        $admin->save();
-
-        // Update user fields
-        $user->email = $data['email'];
-        if (!empty($data['password'])) {
-            $user->password = bcrypt($data['password']);
-        }
-        $user->save();
-
-        // Prepare response with full URLs
-        $admin->profile_pic = $admin->profile_pic ? asset($admin->profile_pic) : null;
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Profile updated successfully',
-            'admin' => $admin,
-            'user' => $user,
-        ]);
     }
+
     // public function updateAdminProfile(Request $request, $id)
     // {
     //     $admin = admins::find($id);
@@ -330,11 +339,10 @@ class AdminController extends Controller
     public function getAllProducts()
     {
         $products = product::get()->map(function ($product) {
-            $product->image_url = asset($product->image);
+            $product->image_url = $product->image ? asset($product->image) : asset('images/default-profile.jpg');
             $product->units_sold = $product->orderItems()->sum('quantity');
             return $product;
         });
-
         return response()->json($products);
     }
     public function restockProduct(Request $request, $id)
@@ -1005,86 +1013,86 @@ class AdminController extends Controller
     }
     // In your Laravel API controller
 
-public function getSalesAnalytics(Request $request)
-{
-    $period = $request->input('period', 'month');
-    $year = $request->input('year', date('Y'));
-    
-    $query = orders::query()
-        ->select(
-            DB::raw('YEAR(order_datetime) as year'),
-            DB::raw('MONTH(order_datetime) as month'),
-            DB::raw('WEEK(order_datetime) as week'),
-            DB::raw('DATE(order_datetime) as date'),
-            DB::raw('COUNT(*) as order_count'),
-            DB::raw('SUM(total_payment) as total_revenue')
-        )
-        ->whereYear('order_datetime', $year);
-    
-    if ($period === 'day') {
-        $query->groupBy('date');
-    } elseif ($period === 'week') {
-        $query->groupBy('year', 'week');
-    } elseif ($period === 'month') {
-        $query->groupBy('year', 'month');
-    } else {
-        $query->groupBy('year');
+    public function getSalesAnalytics(Request $request)
+    {
+        $period = $request->input('period', 'month');
+        $year = $request->input('year', date('Y'));
+
+        $query = orders::query()
+            ->select(
+                DB::raw('YEAR(order_datetime) as year'),
+                DB::raw('MONTH(order_datetime) as month'),
+                DB::raw('WEEK(order_datetime) as week'),
+                DB::raw('DATE(order_datetime) as date'),
+                DB::raw('COUNT(*) as order_count'),
+                DB::raw('SUM(total_payment) as total_revenue')
+            )
+            ->whereYear('order_datetime', $year);
+
+        if ($period === 'day') {
+            $query->groupBy('date');
+        } elseif ($period === 'week') {
+            $query->groupBy('year', 'week');
+        } elseif ($period === 'month') {
+            $query->groupBy('year', 'month');
+        } else {
+            $query->groupBy('year');
+        }
+
+        $results = $query->orderBy('year')
+            ->when($period === 'month', fn($q) => $q->orderBy('month'))
+            ->when($period === 'week', fn($q) => $q->orderBy('week'))
+            ->when($period === 'day', fn($q) => $q->orderBy('date'))
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $results
+        ]);
     }
-    
-    $results = $query->orderBy('year')
-        ->when($period === 'month', fn($q) => $q->orderBy('month'))
-        ->when($period === 'week', fn($q) => $q->orderBy('week'))
-        ->when($period === 'day', fn($q) => $q->orderBy('date'))
-        ->get();
-    
-    return response()->json([
-        'success' => true,
-        'data' => $results
-    ]);
-}
 
-public function getTopCustomers()
-{
-    $customers = customers::withSum('orders', 'total_payment')
-        ->withCount('orders')
-        ->orderByDesc('orders_sum_total_payment')
-        ->limit(5)
-        ->get()
-        ->map(function ($customer) {
-            return [
-                'id' => $customer->id,
-                'name' => $customer->name,
-                'total' => $customer->orders_sum_total_payment,
-                'orders' => $customer->orders_count
-            ];
-        });
-    
-    return response()->json([
-        'success' => true,
-        'data' => $customers
-    ]);
-}
+    public function getTopCustomers()
+    {
+        $customers = customers::withSum('orders', 'total_payment')
+            ->withCount('orders')
+            ->orderByDesc('orders_sum_total_payment')
+            ->limit(5)
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'total' => $customer->orders_sum_total_payment,
+                    'orders' => $customer->orders_count
+                ];
+            });
 
-public function getTopProducts()
-{
-    $products = Product::withSum('orderItems', 'price_at_purchase')
-        ->withSum('orderItems', 'quantity')
-        ->orderByDesc('order_items_sum_price_at_purchase')
-        ->limit(5)
-        ->get()
-        ->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'revenue' => $product->order_items_sum_price_at_purchase,
-                'quantity' => $product->order_items_sum_quantity
-            ];
-        });
-    
-    return response()->json([
-        'success' => true,
-        'data' => $products
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'data' => $customers
+        ]);
+    }
+
+    public function getTopProducts()
+    {
+        $products = Product::withSum('orderItems', 'price_at_purchase')
+            ->withSum('orderItems', 'quantity')
+            ->orderByDesc('order_items_sum_price_at_purchase')
+            ->limit(5)
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'revenue' => $product->order_items_sum_price_at_purchase,
+                    'quantity' => $product->order_items_sum_quantity
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $products
+        ]);
+    }
 }
 

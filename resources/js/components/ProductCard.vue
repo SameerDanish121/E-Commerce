@@ -5,68 +5,64 @@
         <span v-if="product.stock === 0" class="badge bg-danger">Out of Stock</span>
         <span v-else-if="product.price < 1000" class="badge bg-success">Great Deal</span>
       </div>
-      
+
       <!-- <button class="btn-wishlist" @click="toggleWishlist">
         <i class="bi" :class="isInWishlist ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
       </button> -->
-      
+
       <div class="product-image-container">
-        <img :src="product.image_url" :alt="product.name" class="card-img-top"  @error="this.src='/images/temp.jpg'">
+        <img :src="product.image_url" :alt="product.name" class="card-img-top" @error="this.src = '/images/temp.jpg'">
       </div>
-      
+
       <div class="card-body">
         <h5 class="card-title">{{ product.name }}</h5>
         <p class="card-text text-muted small">{{ product.description.substring(0, 50) }}...</p>
-        
-        <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <!-- <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
             <span class="text-primary fw-bold">Rs {{ product.price.toLocaleString('en-IN') }}</span>
             <span v-if="product.original_price" class="text-decoration-line-through text-muted small ms-2">
               ₹{{ product.original_price.toLocaleString('en-IN') }}
             </span>
           </div>
-          <span class="stock-badge" :class="{'text-danger': product.stock < 5, 'text-success': product.stock >= 5}">
+          <span class="stock-badge" :class="{ 'text-danger': product.stock < 5, 'text-success': product.stock >= 5 }">
             {{ product.stock }} left
           </span>
+        </div> -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+          <div class="text-nowrap">
+            <span class="text-primary fw-bold">
+              Rs {{ formatNumber(product.price) }}
+            </span>
+            <span v-if="product.original_price" class="text-decoration-line-through text-muted small ms-2 text-nowrap">
+              ₹{{ formatNumber(product.original_price) }}
+            </span>
+          </div>
+
+          <span class="stock-badge text-nowrap ms-2 mt-2 mt-sm-0"
+            :class="{ 'text-danger': product.stock < 5, 'text-success': product.stock >= 5 }">
+            {{ formatNumber(product.stock) }} left
+          </span>
         </div>
-        
+
         <div class="quantity-controls" v-if="product.stock > 0">
           <div class="input-group">
-            <button 
-              class="btn btn-outline-secondary" 
-              type="button"
-              @click="decreaseQuantity"
-              :disabled="quantity <= 1"
-            >
+            <button class="btn btn-outline-secondary" type="button" @click="decreaseQuantity" :disabled="quantity <= 1">
               <i class="bi bi-dash-lg"></i>
             </button>
-            <input 
-              type="text" 
-              class="form-control text-center" 
-              v-model="quantity"
-              @change="validateQuantity"
-              readonly
-            >
-            <button 
-              class="btn btn-outline-secondary" 
-              type="button"
-              @click="increaseQuantity"
-              :disabled="quantity >= product.stock"
-            >
+            <input type="text" class="form-control text-center" v-model="quantity" @change="validateQuantity" readonly>
+            <button class="btn btn-outline-secondary" type="button" @click="increaseQuantity"
+              :disabled="quantity >= product.stock">
               <i class="bi bi-plus-lg"></i>
             </button>
           </div>
         </div>
-        
-        <button 
-          class="btn btn-primary w-100 mt-2 add-to-cart"
-          @click="addToCart"
-          :disabled="product.stock === 0"
-          :class="{'btn-disabled': product.stock === 0}"
-        >
+
+        <button class="btn btn-primary w-100 mt-2 add-to-cart" @click="addToCart" :disabled="product.stock === 0"
+          :class="{ 'btn-disabled': product.stock === 0 }">
           <span v-if="product.stock === 0">Out of Stock</span>
-          <span v-else-if="cartQuantity > 0">Add {{quantity}} ({{ cartQuantity }} in cart)</span>
-          <span v-else>Add {{quantity}} to Cart <i class="bi bi-cart-plus ms-1"></i></span>
+          <span v-else-if="cartQuantity > 0">Add {{ quantity }} ({{ cartQuantity }} in cart)</span>
+          <span v-else>Add {{ quantity }} to Cart <i class="bi bi-cart-plus ms-1"></i></span>
         </button>
       </div>
     </div>
@@ -125,7 +121,7 @@ const addToCart = () => {
     ...props.product,
     quantity: quantity.value
   });
-  
+
   const button = document.querySelector(`[data-product-id="${props.product.id}"] .add-to-cart`);
   if (button) {
     button.classList.add('clicked');
@@ -133,6 +129,12 @@ const addToCart = () => {
       button.classList.remove('clicked');
     }, 300);
   }
+};
+const formatNumber = (value) => {
+  if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + 'B';
+  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+  if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
+  return value;
 };
 </script>
 
@@ -159,7 +161,7 @@ const addToCart = () => {
 }
 
 .card:hover {
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
 .badge-container {
@@ -187,7 +189,7 @@ const addToCart = () => {
   justify-content: center;
   border: none;
   z-index: 2;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -223,7 +225,7 @@ const addToCart = () => {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  
+
 }
 
 .card-title {
@@ -281,9 +283,17 @@ const addToCart = () => {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.95); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 992px) {
@@ -298,16 +308,16 @@ const addToCart = () => {
     min-width: 200px;
     max-width: 200px;
   }
-  
+
   .product-image-container {
     height: 150px;
   }
-  
+
   .add-to-cart {
     font-size: 0.85rem;
     padding: 0.4rem;
   }
-  
+
   .quantity-controls .input-group {
     width: 100px;
   }
@@ -318,33 +328,33 @@ const addToCart = () => {
     min-width: 160px;
     max-width: 160px;
   }
-  
+
   .card-body {
     padding: 1rem;
   }
-  
+
   .card-title {
     font-size: 0.95rem;
   }
-  
+
   .card-text {
     font-size: 0.8rem;
     min-height: 36px;
   }
-  
+
   .add-to-cart {
     font-size: 0.8rem;
   }
-  
+
   .product-image-container {
     height: 130px;
   }
 }
+
 .product-card,
 .card {
   height: 420px;
   display: flex;
   flex-direction: column;
 }
-
 </style>

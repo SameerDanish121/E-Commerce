@@ -537,7 +537,7 @@ const deleteCustomer = async (customerId) => {
  -->
 <template>
   <div class="admin-customers-page">
-    <section class="admin-header">
+    <!-- <section class="admin-header">
       <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center py-4">
           <h1 class="page-title">Customer Management</h1>
@@ -547,6 +547,23 @@ const deleteCustomer = async (customerId) => {
           </button>
         </div>
       </div>
+    </section> -->
+    <section class="admin-header">
+      <div class="container-fluid">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+
+          <h1 class="page-title mb-0 text-nowrap" style="font-size: 1.75rem;">
+            Customer Management
+          </h1>
+
+          <button class="btn btn-primary text-nowrap px-3 py-2" @click="refreshCustomers"
+            :disabled="customerStore.isLoading" style="font-size: 1rem;">
+            <i class="bi" :class="customerStore.isLoading ? 'bi-arrow-repeat spin' : 'bi-arrow-clockwise'"></i>
+            Refresh Customers
+          </button>
+
+        </div>
+      </div>
     </section>
 
     <section class="filters-section py-3 bg-light">
@@ -554,8 +571,6 @@ const deleteCustomer = async (customerId) => {
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">Search</label>
-            <!-- <input v-model="searchQuery" type="text" class="form-control"
-              placeholder="Search by name, username or ID..." @input="handleSearch"> -->
             <input v-model="searchQuery" type="text" class="form-control"
               placeholder="Search by name, username or ID..."
               @input="searchQuery = $event.target.value.replace(/[^a-zA-Z\s]/g, '').slice(0, 20)">
@@ -754,10 +769,17 @@ const deleteCustomer = async (customerId) => {
                     <td>
                       <span class="badge bg-light text-dark">{{ customer.username }}</span>
                     </td>
-                    <td>
+                    <!-- <td>
                       <p class="mb-0">{{ customer.phone_no || 'N/A' }}</p>
                       <p class="text-muted small mb-0">{{ customer.email || 'No email' }}</p>
+                    </td> -->
+                    <td>
+                      <p class="mb-0">{{ customer.phone_no || 'N/A' }}</p>
+                      <p class="text-muted small mb-0 d-none d-sm-block">
+                        {{ customer.email || 'No email' }}
+                      </p>
                     </td>
+
                     <td>
                       <span class="badge" :class="genderBadgeClass(customer.gender)">
                         {{ customer.gender || 'Not specified' }}
@@ -907,18 +929,16 @@ const deleteCustomer = async (customerId) => {
 
           <div class="modal-body">
             <div v-if="selectedCustomer" class="row">
-              <!-- Left column: Avatar + Name -->
               <div class="col-md-4 text-center">
-                <img :src="selectedCustomer.profile_pic || '/images/default-profile.png'"
-                  class="img-thumbnail rounded-circle mb-3" width="150" height="150" alt="Customer">
+                <div class="d-flex justify-content-center">
+                  <img :src="selectedCustomer.profile_pic || '/images/default-profile.png'" class="customer-avatar"
+                    alt="Customer" />
+                </div>
                 <h4>{{ selectedCustomer.name }}</h4>
                 <p class="text-muted">{{ selectedCustomer.username }}</p>
               </div>
-
-              <!-- Right column: Details -->
               <div class="col-md-8">
                 <div class="row mb-3">
-                  <!-- Basic Info -->
                   <div class="col-md-6">
                     <div class="card bg-light h-100">
                       <div class="card-body">
@@ -1453,6 +1473,26 @@ const viewCustomerDetails = (customer) => {
 
   .table td::before {
     width: 35%;
+  }
+}
+
+.customer-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+@media (max-width: 521px) {
+  .page-title {
+    font-size: 1.3rem !important;
+  }
+
+  .btn-primary {
+    font-size: 0.85rem !important;
+    padding: 0.4rem 0.75rem !important;
   }
 }
 </style>
