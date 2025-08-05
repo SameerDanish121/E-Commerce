@@ -19,6 +19,7 @@
         "@fortawesome/fontawesome-free": "^7.0.0",
         "@kyvg/vue3-notification": "^3.4.1",
         "@motionone/dom": "^10.18.0",
+        "bootstrap": "^5.3.7",
         "bootstrap-icons": "^1.13.1",
         "chart.js": "^4.5.0",
         "chartjs-plugin-annotation": "^3.1.0",
