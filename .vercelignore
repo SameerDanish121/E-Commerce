@@ -1,5 +1,10 @@
-
 /vendor
 /node_modules
 /tests
 /.git
+/.github
+/.vscode
+/.idea
+*.md
+*.txt
+*.log

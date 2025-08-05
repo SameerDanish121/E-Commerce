@@ -1,12 +1,26 @@
 {
   "version": 2,
-  "framework": null,
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.6.0"
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "@vercel/php"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "public"
+      }
     }
-  },
+  ],
   "routes": [
+    {
+      "src": "/build/assets/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index.php"
@@ -14,10 +28,10 @@
   ],
   "env": {
     "APP_ENV": "production",
-    "APP_DEBUG": "true",
-    "APP_URL": "https://shopmaster.app",
+    "APP_DEBUG": "false",
+    "APP_URL": "https://e-commerce-q92v-d8w9updgg-sameerdanish121s-projects.vercel.app",
     "APP_KEY": "base64:CoG25ptD3FYCNd+r971UHeqUaOm5PJJzYvdtnzuCaBA=",
-
+    
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
     "APP_PACKAGES_CACHE": "/tmp/packages.php",
@@ -27,6 +41,7 @@
 
     "CACHE_DRIVER": "array",
     "LOG_CHANNEL": "stderr",
-    "SESSION_DRIVER": "cookie"
+    "SESSION_DRIVER": "cookie",
+    "SESSION_SECURE_COOKIE": "true"
   }
 }
