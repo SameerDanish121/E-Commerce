@@ -7,7 +7,9 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TestController;
 
-
+Route::get('/', function() {
+    return response('Hello Vercel', 200, );
+});
 Route::get('/employees', [TestController::class, 'index']);
 Route::post('/employees', [TestController::class, 'store']);
 Route::get('/employees/{id}', [TestController::class, 'show']);
