@@ -38,7 +38,7 @@
               ₹{{ formatNumber(product.original_price) }}
             </span>
           </div>
-
+        
           <span class="stock-badge text-nowrap ms-2 mt-2 mt-sm-0"
             :class="{ 'text-danger': product.stock < 5, 'text-success': product.stock >= 5 }">
             {{ formatNumber(product.stock) }} left
