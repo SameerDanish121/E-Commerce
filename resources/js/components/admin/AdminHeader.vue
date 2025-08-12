@@ -384,7 +384,6 @@ header {
   <header class="sticky-top">
     <div class="container-fluid px-3 px-md-4">
       <div class="row align-items-center py-2 py-md-3">
-        <!-- Logo Section - Takes less space on smaller screens -->
         <div class="col-7 col-sm-5 col-md-4 col-lg-3">
           <router-link to="/chart" class="text-decoration-none d-flex align-items-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag me-2">
@@ -395,8 +394,6 @@ header {
             <h1 class="m-0 fs-3 fw-bold text-primary text-truncate">ShopMaster</h1>
           </router-link>
         </div>
-      
-        <!-- Navigation Section - Adjusts based on available space -->
         <div class="col-5 col-sm-7 col-md-8 col-lg-9">
           <nav class="navbar navbar-expand-lg p-0">
             <button class="navbar-toggler border-0 p-0 ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -414,8 +411,6 @@ header {
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
-              
-              <!-- Navigation Items - Adjusts based on available space -->
               <ul class="navbar-nav ms-auto align-items-lg-center">
                 <li class="nav-item" v-for="route in routes" :key="route.name">
                   <router-link 
@@ -429,8 +424,7 @@ header {
                     <span class="nav-text d-none d-lg-inline">{{ route.name }}</span>
                   </router-link>
                 </li>
-              
-                <!-- Profile Dropdown - Always visible -->
+                
                 <li class="nav-item dropdown ms-lg-2">
                   <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="profile-pic-container">
@@ -474,6 +468,16 @@ header {
       </div>
       <div class="border-bottom"></div>
     </div>
+    <button 
+      @click="goToAdminChat"
+      class="floating-support-btn"
+      title="Customer Support"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-headphones">
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+      </svg>
+    </button>
   </header>
 </template>
 
@@ -561,10 +565,14 @@ export default {
       customerStore.logout();
       window.location.href='/';
     };
+const goToAdminChat = () => {
+      window.location.href = '/admin_chat';
+    };
 
     return {
       customerStore,
-      handleLogout
+      handleLogout,
+      goToAdminChat
     };
   },
   data() {
@@ -717,8 +725,6 @@ header {
   cursor: pointer;
   z-index: 1051;
 }
-
-/* Mobile styles */
 @media (max-width: 991.98px) {
   .navbar-collapse {
     position: fixed;
@@ -778,7 +784,6 @@ header {
   }
 }
 
-/* Desktop styles */
 @media (min-width: 992px) {
   .nav-link {
     padding: 0.5rem 1rem;
@@ -797,7 +802,6 @@ header {
   }
 }
 
-/* Overlay for mobile menu */
 .navbar-collapse::before {
   content: '';
   position: fixed;
@@ -1037,5 +1041,95 @@ header {
 .navbar-collapse.show::before {
   opacity: 1;
   pointer-events: auto;
+}
+
+.support-btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--bs-primary);
+  color: white;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.support-btn-container:hover {
+  background-color: var(--bs-primary-dark);
+  transform: scale(1.05);
+}
+
+.support-btn-container svg {
+  width: 20px;
+  height: 20px;
+}
+
+.floating-support-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--bs-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.floating-support-btn:hover {
+  background-color: var(--bs-primary-dark);
+  transform: scale(1.1);
+  color: white;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+}
+
+.floating-support-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(var(--bs-primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-primary-rgb), 0);
+  }
+}
+
+.floating-support-btn {
+  animation: pulse 2s infinite;
+}
+@media (hover: hover) {
+  .floating-support-btn:hover {
+    animation: none;
+  }
+}
+@media (max-width: 768px) {
+  .floating-support-btn {
+    width: 56px;
+    height: 56px;
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .floating-support-btn svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 </style>

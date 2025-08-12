@@ -23,6 +23,19 @@ export const useOrderProcessingStore = defineStore('OrderProcessingStore', () =>
             isLoading.value = false;
         }
     }
+    async function generateQRCode(orderId) {
+  try {
+    isLoading.value = true;
+    const response = await axios.get(`/orders/details/${orderId}`);
+    return response.data.data;
+  } catch (err) {
+    error.value = err.message;
+    console.error('Failed to fetch order details:', err);
+    throw err;
+  } finally {
+    isLoading.value = false;
+  }
+}
     async function processOrder(orderId, status, actual_delivery_date = null) {
         try {
             isLoading.value = true;
@@ -86,7 +99,7 @@ export const useOrderProcessingStore = defineStore('OrderProcessingStore', () =>
                 filterMinPrice.value === null || totalPrice >= filterMinPrice.value;
 
             const matchesMaxPrice =
-                filterMaxPrice.value === null || totalPrice <= filterMaxPrice.value;
+               filterMaxPrice.value =='' || filterMaxPrice.value === null || totalPrice <= filterMaxPrice.value;
 
             const matchesDate =
                 !filterOrderDate.value ||
@@ -114,6 +127,7 @@ export const useOrderProcessingStore = defineStore('OrderProcessingStore', () =>
         fetchAllOrders,
         processOrder,
         removeOrderLocally,
-        filteredOrders
+        filteredOrders,
+        generateQRCode
     };
 });

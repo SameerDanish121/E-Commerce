@@ -17,7 +17,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 ChartJS.register(zoomPlugin, ChartDataLabels);
 
 
-const socket = io("http://localhost:3001", {
+const socket = io("http://192.168.18.33:3001", {
   auth: {
     privateKey: "abc"
   }

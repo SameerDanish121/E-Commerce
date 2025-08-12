@@ -99,34 +99,7 @@
                 <div class="row">
 
                   <div class="col-md-4 mb-4 mb-md-0">
-                    <!-- <div class="customer-details">
-                      <h6 class="section-title">Customer Details</h6>
-                      <div class="d-flex align-items-center mb-3">
-                        <div class="customer-avatar me-3">
-                          <img :src="order.customer.profile_pic || '/images/default-profile.png'" class="rounded-circle"
-                            width="50" height="50" alt="Customer">
-                        </div>
-                        <div>
-                          <h6 class="mb-0">{{ order.customer.name }}</h6>
-                          <small class="text-muted">{{ order.customer.phone_no }}</small>
-                        </div>
-                      </div>
-                      <div class="customer-meta">
-                        <p class="small mb-1">
-                          <i class="bi bi-gender-ambiguous me-2"></i>
-                          {{ order.customer.gender || 'Not specified' }}
-                        </p>
-                        <p class="small mb-1">
-                          <i class="bi bi-calendar me-2"></i>
-                          {{ order.customer.dob ? formatDate(order.customer.dob) : 'Not specified' }}
-                        </p>
-                        <p class="small mb-0">
-                          <i class="bi bi-geo-alt me-2"></i>
-                          {{ order.customer.address || 'Not specified' }}
-                        </p>
-                      </div>
-                    </div> -->
-                    <div class="customer-details">
+                   <div class="customer-details">
                       <h6 class="section-title">Customer Details</h6>
 
                       <div class="d-flex align-items-center mb-3">
@@ -141,7 +114,7 @@
                       </div>
 
                       <div class="customer-meta">
-                        <!-- Gender -->
+                       
                         <p class="small mb-1">
                           <i v-if="order.customer.gender === 'Male'" class="bi bi-gender-male me-2 text-primary"></i>
                           <i v-else-if="order.customer.gender === 'Female'"
@@ -151,14 +124,11 @@
                           {{ order.customer.gender || 'Not specified' }}
                         </p>
 
-                        <!-- Date of Birth -->
                         <p class="small mb-1">
                           <i class="bi bi-calendar-date me-2"></i>
                           <strong>Date of Birth:</strong>
                           {{ order.customer.dob ? formatDate(order.customer.dob) : 'Not specified' }}
                         </p>
-
-                        <!-- Address -->
                         <p class="small mb-0">
                           <i class="bi bi-geo-alt-fill me-2"></i>
                           <strong>Address:</strong>
@@ -231,57 +201,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <small class="text-muted">
-                      Last updated: {{ formatDateTime(order.updated_at || order.order_datetime) }}
-                    </small>
-                  </div>
-                  <div class="order-actions">
-                    <template v-if="order.status === 'Pending'">
-                      <button v-if="adminStore.hasPermission('Dispatch Order')"
-                        class="btn btn-sm btn-outline-success me-2" @click="processOrder(order.order_id, 'Dispatched')">
-                        <i class="bi bi-truck me-1"></i> Dispatch
-                      </button>
-                      <button v-if="adminStore.hasPermission('Cancel Order')" class="btn btn-sm btn-outline-danger"
-                        @click="confirmCancelOrder(order.order_id)">
-                        <i class="bi bi-x-circle me-1"></i> Cancel
-                      </button>
-                    </template>
-
-<template v-else-if="order.status === 'Dispatched'">
-                      <div class="d-flex align-items-center">
-                        <div class="me-3" v-if="!isCompletingOrder[order.order_id]">
-                          <label class="form-label small mb-0 me-2">Delivery Date:</label>
-                         
-                          <input type="date" v-model="deliveryDates[order.order_id]"
-                            class="form-control form-control-sm" :max="new Date().toISOString().split('T')[0]"
-                            :min="new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0]"
-                            @keydown.prevent>
-
-
-                        </div>
-                        <button v-if="adminStore.hasPermission('Complete Order')" class="btn btn-sm btn-success me-2"
-                          @click="completeOrder(order.order_id)" :disabled="!deliveryDates[order.order_id]">
-                          <i class="bi bi-check-circle me-1"></i>
-                          {{ isCompletingOrder[order.order_id] ? 'Completing...' : 'Complete' }}
-                        </button>
-                        <button v-if="adminStore.hasPermission('Cancel Order')" class="btn btn-sm btn-outline-danger"
-                          @click="confirmCancelOrder(order.order_id)">
-                          <i class="bi bi-x-circle me-1"></i> Cancel
-                        </button>
-                      </div>
-                    </template>
-
-<template v-else>
-                      <span class="text-muted small">No actions available</span>
-                    </template>
-</div>
-</div>
-</div> -->
-
               <div class="card-footer">
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
                   <div class="mb-2 mb-sm-0 text-center text-sm-start">
@@ -555,11 +474,6 @@ const confirmCancelOrder = (orderId) => {
     flex-direction: column;
     gap: 0.5rem;
   }
-
-  /* .order-actions .btn {
-    width: 100%;
-  } */
-
   .delivery-info {
     margin-top: 1rem;
   }

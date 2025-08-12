@@ -1776,7 +1776,7 @@ export default {
                             <input type="checkbox" id="remember" v-model="form.remember" :disabled="loginBlocked">
                             <label for="remember">Remember me</label>
                         </div>
-                        <!-- <router-link v-if="!form.remember" to="/forgot-password" class="forgot-password">Forgot password?</router-link> -->
+                        <router-link v-if="!form.remember" to="/chat" class="forgot-password">Forgot password?</router-link>
                     </div>
 
                     <button type="submit" class="login-btn" :disabled="loading || autoLoginLoading || loginBlocked">

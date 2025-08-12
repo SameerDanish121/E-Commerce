@@ -70,12 +70,12 @@
                       <span class="text-muted me-3" style="width: 120px;"><i class="bi bi-phone me-2"></i>Phone:</span>
                       <span>{{ customer.phone_no || 'Not provided' }}</span>
                     </li>
-                   
+
                     <li class="d-flex align-items-start mb-2">
                       <span class="text-muted fw-semibold d-inline-block" style="width: 130px;">
-                        <i class="bi bi-geo-alt me-2"></i>Address:   
+                        <i class="bi bi-geo-alt me-2"></i>Address:
                       </span>
-                      <span>{{customer.address || 'Not provided' }}</span>
+                      <span>{{ customer.address || 'Not provided' }}</span>
                     </li>
                   </ul>
                 </div>
@@ -124,8 +124,11 @@
 
                     <div class="col-md-6">
                       <label class="form-label">Date of Birth</label>
+                      <!-- <input type="date" class="form-control" v-model="formData.dob"
+                        :max="new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split('T')[0]"> -->
                       <input type="date" class="form-control" v-model="formData.dob"
-                        :max="new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split('T')[0]">
+                        :max="new Date().toISOString().split('T')[0]">
+
                     </div>
 
                     <div class="col-md-6">

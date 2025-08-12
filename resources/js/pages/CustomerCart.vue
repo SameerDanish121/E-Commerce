@@ -1,6 +1,6 @@
 <template>
   <div class="cart-view">
-    <section class="cart-hero">
+    <!-- <section class="cart-hero">
       <div class="container">
         <div
           class="cart-hero-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
@@ -15,7 +15,24 @@
           </router-link>
         </div>
       </div>
+    </section> -->
+    <section class="cart-hero">
+      <div class="container">
+        <div
+          class="cart-hero-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 gap-md-0">
+          <div class="text-start">
+            <h1 class="mb-1">Your Shopping Cart</h1>
+            <p class="lead mb-0">
+              {{ cartStore.totalItems }} {{ cartStore.totalItems === 1 ? 'item' : 'items' }} in your cart
+            </p>
+          </div>
+          <router-link to="/home" class="btn btn-outline-primary mt-3 mt-md-0 d-flex align-items-center">
+            <i class="bi bi-arrow-left me-2"></i> Continue Shopping
+          </router-link>
+        </div>
+      </div>
     </section>
+
 
     <section class="cart-content py-4">
       <div class="container">
@@ -753,6 +770,7 @@ const placeOrder = async (paymentMethod) => {
     padding: 1rem;
   }
 }
+
 /* Default (desktop) */
 .quantity-btn {
   padding: 0.4rem 0.75rem;
@@ -789,5 +807,4 @@ const placeOrder = async (paymentMethod) => {
     min-width: 30px;
   }
 }
-
 </style>

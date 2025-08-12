@@ -440,6 +440,55 @@ class AdminController extends Controller
             ], 500);
         }
     }
+    public function getOrderDetails($id)
+    {
+        try {
+            $order = orders::with(['customer', 'orderItems.product'])
+                ->findOrFail($id);
+
+            $result = [
+                'order_id' => $order->id,
+                'status' => $order->status,
+                'order_datetime' => $order->order_datetime,
+                'expected_delivery_date' => $order->expected_delivery_date,
+                'actual_delivery_date' => $order->actual_delivery_date,
+                'delivery_address' => $order->delivery_address,
+                'total_payment' => $order->total_payment,
+                'delivered_on_time' => $order->delivered_on_time,
+                'customer' => [
+                    'customer_id' => $order->customer->id ?? null,
+                    'name' => $order->customer->name ?? null,
+                    'phone_no' => $order->customer->phone_no ?? null,
+                    'address' => $order->customer->address ?? null,
+                    'gender' => $order->customer->gender ?? null,
+                    'dob' => $order->customer->dob ?? null,
+                    'profile_pic' => $order->customer->profile_pic ? asset($order->customer->profile_pic) : null,
+                ],
+                'products' => $order->orderItems->map(function ($item) {
+                    return [
+                        'product_id' => $item->product->id ?? null,
+                        'product_name' => $item->product->name ?? null,
+                        'description' => $item->product->description ?? null,
+                        'price_at_purchase' => $item->price_at_purchase,
+                        'quantity' => $item->quantity,
+                        'image' => $item->product->image ? asset($item->product->image) : null,
+                    ];
+                })
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $result
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found.',
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
     public function processOrder(Request $request, $orderId)
     {
         try {
@@ -738,7 +787,6 @@ class AdminController extends Controller
                 ]));
 
                 logger("📡 AdminUpdated event published to Redis");
-
             } catch (Exception $e) {
                 logger("❌ Failed to publish AdminUpdated event: " . $e->getMessage());
             }
@@ -1094,5 +1142,57 @@ class AdminController extends Controller
             'data' => $products
         ]);
     }
+
+    public function showOrderDetails($id)
+    {
+        try {
+            $orderModel = orders::with(['customer', 'orderItems.product'])
+                ->findOrFail($id);
+            $order = (object) [
+                'order_id' => $orderModel->id,
+                'status' => $orderModel->status,
+                'order_datetime' => Carbon::parse($orderModel->order_datetime),
+                'expected_delivery_date' => $orderModel->expected_delivery_date ? Carbon::parse($orderModel->expected_delivery_date) : null,
+                'actual_delivery_date' => $orderModel->actual_delivery_date ? Carbon::parse($orderModel->actual_delivery_date) : null,
+                'delivery_address' => $orderModel->delivery_address,
+                'total_payment' => $orderModel->total_payment,
+                'delivered_on_time' => $orderModel->delivered_on_time,
+                'customer' => (object) [
+                    'customer_id' => $orderModel->customer->id ?? null,
+                    'name' => $orderModel->customer->name ?? null,
+                    'phone_no' => $orderModel->customer->phone_no ?? null,
+                    'address' => $orderModel->customer->address ?? null,
+                    'gender' => $orderModel->customer->gender ?? null,
+                    'dob' => $orderModel->customer->dob ? Carbon::parse($orderModel->customer->dob) : null,
+                    'profile_pic' => $orderModel->customer->profile_pic ? asset($orderModel->customer->profile_pic) : null,
+                ],
+                'products' => $orderModel->orderItems->map(function ($item) {
+                    return [
+                        'product_id' => $item->product->id ?? null,
+                        'product_name' => $item->product->name ?? null,
+                        'description' => $item->product->description ?? null,
+                        'price_at_purchase' => $item->price_at_purchase,
+                        'quantity' => $item->quantity,
+                        'image' => $item->product->image ? asset($item->product->image) : asset('images/placeholder-product.png'),
+                    ];
+                })->toArray()
+            ];
+            $progressWidth = match ($order->status) {
+                'Pending' => 0,
+                'Dispatched' => 50,
+                'Completed' => 100,
+                default => 0
+            };
+            return view('Admin.Product_Details', [
+                'order' => $order,
+                'progressWidth' => $progressWidth
+            ]);
+
+        } catch (Exception $e) {
+            abort(500, 'Unable to load order details: ' . $e->getMessage());
+        }
+    }
+
+
 }
 

@@ -641,58 +641,7 @@ const handleAddToCart = (product) => {
         </div>
       </section>
     </template>
-    <!-- <template v-if="selectedCategory === 'all'">
-      <section 
-        v-for="category in uniqueCategories" 
-        :key="category" 
-        class="category-section py-4"
-      >
-        <div class="container-fluid position-relative">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title">{{ category }}</h2>
-          </div>
-          
-          <div class="category-products-wrapper position-relative">
-            <div 
-              class="category-products" 
-              :ref="el => setScrollContainerRef(el, category)"
-              tabindex="0"
-              @keydown.left="scrollCategory(category, 'left')"
-              @keydown.right="scrollCategory(category, 'right')"
-            >
-              <ProductCard 
-                v-for="product in getProductsByCategory(category)" 
-                :key="product.id" 
-                :product="product"
-                :initial-quantity="getCartQuantity(product.id)"
-                @add-to-cart="handleAddToCart"
-              />
-            </div>
-
-            <button 
-              v-if="shouldShowScrollButtons(category)"
-              class="scroll-button scroll-left btn p-0 rounded-circle"
-              @click="scrollCategory(category, 'left')"
-              @mouseenter="setScrollHover(category, true)"
-              @mouseleave="setScrollHover(category, false)"
-            >
-              <i class="bi bi-arrow-left fs-3 fw-bold"></i>
-            </button>
-            
-            <button 
-              v-if="shouldShowScrollButtons(category)"
-              class="scroll-button scroll-right btn p-0 rounded-circle"
-              @click="scrollCategory(category, 'right')"
-              @mouseenter="setScrollHover(category, true)"
-              @mouseleave="setScrollHover(category, false)"
-            >
-              <i class="bi bi-arrow-right fs-3 fw-bold"></i>
-            </button>
-          </div>
-        </div>
-      </section>
-    </template> -->
-
+ 
     <section class="all-products py-4">
       <div class="container-fluid position-relative">
         <div class="d-flex justify-content-between align-items-center mb-4">

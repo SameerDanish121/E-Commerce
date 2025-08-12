@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\AdminChatController;
+use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoTaskController;
@@ -7,14 +9,6 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TestController;
 
-Route::get('/', function() {
-    return response('Hello Vercel', 200, );
-});
-Route::get('/employees', [TestController::class, 'index']);
-Route::post('/employees', [TestController::class, 'store']);
-Route::get('/employees/{id}', [TestController::class, 'show']);
-Route::put('/employees/{id}', [TestController::class, 'update']);
-Route::delete('/employees/{id}', [TestController::class, 'destroy']);
 
 
 Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
@@ -22,10 +16,11 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/admin/update-profile/{id}', [AdminController::class, 'updateAdminProfile']);
 Route::prefix('admin')->name('Admin.')->group(function () {
-    Route::get('/{any}', [AdminController::class, 'index'])->where('any', '.*');;
+    Route::get('/{any}', [AdminController::class, 'index'])->where('any', '.*');
+    ;
 });
 Route::prefix('customer')->name('Customer.')->group(function () {
-     Route::get('/{any}', [CustomerController::class, 'index'])->where('any', '.*');
+    Route::get('/{any}', [CustomerController::class, 'index'])->where('any', '.*');
 });
 
 //-----------------------------API-ROUTES
@@ -47,6 +42,7 @@ Route::post('/product/update/{id}', [AdminController::class, 'updateProduct']);
 Route::post('/product/toggle-status/{id}', [AdminController::class, 'toggleProductStatus']);
 Route::post('/product/restock/{id}', [AdminController::class, 'restockProduct']);
 Route::get('/orders/details', [AdminController::class, 'getAllOrdersWithDetails']);
+Route::get('/orders/details/{id}', [AdminController::class, 'getOrderDetails']);
 Route::post('/process-order/{orderId}', [AdminController::class, 'processOrder']);
 Route::get('/all-customers', [CustomerController::class, 'allCustomer']);
 Route::get('/admins', [AdminController::class, 'getAllAdmins']);
@@ -66,6 +62,8 @@ Route::post('/remove-permission', [AdminController::class, 'removePermissionFrom
 
 
 use App\Http\Controllers\StripePaymentController;
+use Illuminate\Support\Facades\Http;
+
 Route::get('/stripe', [StripePaymentController::class, 'showForm'])->name('stripe.form');
 Route::post('/stripe', [StripePaymentController::class, 'makePayment'])->name('stripe.post');
 
@@ -75,7 +73,11 @@ Route::post('/googlepay/intent', [StripePaymentController::class, 'createGoogleP
 
 
 
-Route::get('/hello', function ()  {
+
+Route::get('/order-details/{id}', [AdminController::class, 'showOrderDetails'])
+     ->name('order.details');
+
+Route::get('/hello', function () {
     return view('test_1');
 });
 Route::get('/hmm', function () {
@@ -84,8 +86,7 @@ Route::get('/hmm', function () {
 Route::get('/hello_g', function () {
     return view('test_2');
 });
-
-Route::get('/test', function() {
+Route::get('/test', function () {
     return 'Hello World';
 });
 Route::get('/{vue_capture?}', function () {

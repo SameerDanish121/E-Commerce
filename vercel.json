@@ -1,28 +1,39 @@
 {
-  "functions": {
-    "api/*.php": {
-      "runtime": "vercel-php@0.7.4"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "@vercel/php@0.7.4",
+      "config": {
+        "maxDuration": 30,
+        "memory": 3008
+      }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "public",
+        "includeFiles": [
+          "public/**"
+        ]
+      }
     }
-  },
-  "routes": [
-    { "src": "/(.*)",  "dest": "/api/index.php" }
   ],
-  "env": {
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "APP_URL": "https://e-commerce-q92v-d8w9updgg-sameerdanish121s-projects.vercel.app",
-    "APP_KEY": "base64:CoG25ptD3FYCNd+r971UHeqUaOm5PJJzYvdtnzuCaBA=",
-    
-    "APP_CONFIG_CACHE": "/tmp/config.php",
-    "APP_EVENTS_CACHE": "/tmp/events.php",
-    "APP_PACKAGES_CACHE": "/tmp/packages.php",
-    "APP_ROUTES_CACHE": "/tmp/routes.php",
-    "APP_SERVICES_CACHE": "/tmp/services.php",
-    "VIEW_COMPILED_PATH": "/tmp",
-
-    "CACHE_DRIVER": "array",
-    "LOG_CHANNEL": "stderr",
-    "SESSION_DRIVER": "cookie",
-    "SESSION_SECURE_COOKIE": "true"
-  }
+  "routes": [
+    {
+      "src": "/build/(.*)",
+      "dest": "/public/build/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.php",
+      "headers": {
+        "Content-Type": "text/html; charset=UTF-8"
+      }
+    }
+  ]
 }

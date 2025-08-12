@@ -14,6 +14,9 @@ export function setupSocketEventListeners(socket) {
         const orderStore = useOrderProcessingStore();
         const adminStore = useAllAdminStore();
         console.log(`📡 Event Received: ${eventName}`, data);
+        if(eventName=='chat_events'){
+            return;
+        }
         toast.success(
             `📢 [${eventName}] ${data?.message || "New event received!"}`,
             {
